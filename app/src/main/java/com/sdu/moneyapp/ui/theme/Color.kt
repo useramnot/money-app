@@ -1,4 +1,4 @@
-package com.example.billy.ui.theme
+package com.sdu.moneyapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

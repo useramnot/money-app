@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "438937663315",
+    "project_id": "money-app-sdu",
+    "storage_bucket": "money-app-sdu.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:438937663315:android:079eef592f970d099753a6",
+        "android_client_info": {
+          "package_name": "com.sdu.moneyapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBW2X3bJtOjtTjiak-H6pWYAgVOJxWuR-E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

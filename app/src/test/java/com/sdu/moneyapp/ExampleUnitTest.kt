@@ -1,4 +1,4 @@
-package com.example.billy
+package com.sdu.moneyapp
 
 import org.junit.Test
 
