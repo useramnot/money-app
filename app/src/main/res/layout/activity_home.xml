@@ -1,0 +1,50 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".HomeActivity">
+
+    <!-- Overall Owing/Owed -->
+    <TextView
+        android:id="@+id/textViewOverallOwing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Overall You Owe: $100" />
+
+    <!-- Search Bar -->
+    <EditText
+        android:id="@+id/editTextSearchGroups"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Search Groups"
+        android:inputType="text"/>
+
+    <!-- Create Group Button -->
+    <Button
+        android:id="@+id/buttonCreateGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create Group"/>
+
+    <!-- List of Groups -->
+    <ListView
+        android:id="@+id/listViewGroups"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="1dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"/>
+
+    <!-- Add Expense Button -->
+    <Button
+        android:id="@+id/buttonAddExpense"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Expense"
+        android:layout_gravity="end"/>
+</LinearLayout>

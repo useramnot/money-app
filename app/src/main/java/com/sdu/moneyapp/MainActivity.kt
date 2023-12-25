@@ -10,11 +10,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.google.firebase.FirebaseApp
 import com.sdu.moneyapp.ui.theme.MoneyAppTheme
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FirebaseApp.initializeApp(this)
+
+        val authManager = FirebaseAuthenticationManager
+        val databaseManager = FirebaseDatabaseManager
+        val currentUserUid = authManager.getCurrentUserUid()
+
         setContent {
             MoneyAppTheme {
                 // A surface container using the 'background' color from the theme
