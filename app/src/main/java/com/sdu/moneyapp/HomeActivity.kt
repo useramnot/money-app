@@ -2,8 +2,12 @@ package com.sdu.moneyapp
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.ListView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -17,9 +21,13 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var buttonCreateGroup: Button
     private lateinit var listViewGroups: ListView
     private lateinit var buttonAddExpense: Button
+    private lateinit var imageViewLogo: ImageView
 
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
     private val databaseManager: FirebaseDatabaseManager by lazy { FirebaseDatabaseManager }
+
+    private lateinit var groupAdapter: GroupAdapter
+    private lateinit var originalGroups: List<Group>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,8 +38,8 @@ class HomeActivity : AppCompatActivity() {
         buttonCreateGroup = findViewById(R.id.buttonCreateGroup)
         listViewGroups = findViewById(R.id.listViewGroups)
         buttonAddExpense = findViewById(R.id.buttonAddExpense)
+        imageViewLogo = findViewById(R.id.imageViewLogo)
 
-        // Example: Display overall owing/owed information
         val currentUserUid = auth.currentUser?.uid
         if (currentUserUid != null) {
             databaseManager.getOverallOwing(currentUserUid) { owingAmount ->
@@ -44,28 +52,52 @@ class HomeActivity : AppCompatActivity() {
             startActivity(Intent(this, GroupCreationActivity::class.java))
         }
 
-        // Example: Handle click on "Add Expense" button
         buttonAddExpense.setOnClickListener {
             startActivity(Intent(this, AddExpenseActivity::class.java))
         }
 
-        // Example: Retrieve and display list of groups
-
+        // Retrieve and display list of groups
         if (currentUserUid != null) {
             databaseManager.getGroupsForUser(currentUserUid) { groups ->
-                // Update your UI with the list of groups
-                val groupAdapter = GroupAdapter(this, groups)
+                originalGroups = groups
+                groupAdapter = GroupAdapter(this, originalGroups)
                 listViewGroups.adapter = groupAdapter
             }
         }
 
-        // Example: Handle click on a group in the list
+        editTextSearchGroups.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Not needed for this implementation
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // Not needed for this implementation
+            }
+
+            override fun afterTextChanged(editable: Editable?) {
+                val searchText = editable.toString().trim()
+                val filteredGroups = originalGroups.filter { group ->
+                    group.name.contains(searchText, ignoreCase = true)
+                }
+                groupAdapter.updateGroups(filteredGroups)
+            }
+        })
+
         listViewGroups.setOnItemClickListener { _, _, position, _ ->
             val selectedGroup = listViewGroups.getItemAtPosition(position) as Group
-            // TODO
-            // You can navigate to the group overview or details screen
-            // Pass the selectedGroup information to the next activity if needed
-            // Example: startActivity(Intent(this, GroupOverviewActivity::class.java).putExtra("group", selectedGroup))
+
+            val intent = Intent(this, GroupOverviewActivity::class.java)
+
+            intent.putExtra("groupId", selectedGroup.id)
+            intent.putExtra("groupName", selectedGroup.name)
+            intent.putExtra("groupDescription", selectedGroup.groupDescription)
+
+            startActivity(intent)
+        }
+
+        imageViewLogo.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
         }
     }
+
 }

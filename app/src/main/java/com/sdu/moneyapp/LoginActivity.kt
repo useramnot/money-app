@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 
@@ -11,17 +12,24 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var emailEditText: EditText
     private lateinit var passwordEditText: EditText
+    private lateinit var forgotPassButton: Button
     private lateinit var loginButton: Button
+    private lateinit var registerButton: Button
 
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
         emailEditText = findViewById(R.id.editTextEmail)
         passwordEditText = findViewById(R.id.editTextPassword)
+        forgotPassButton = findViewById(R.id.buttonForgotPass)
         loginButton = findViewById(R.id.buttonLogin)
+        registerButton = findViewById(R.id.buttonRegister)
+
+        forgotPassButton.setOnClickListener {
+            startActivity(Intent(this, ForgotPasswordActivity::class.java))
+        }
 
         loginButton.setOnClickListener {
             val email = emailEditText.text.toString()
@@ -30,17 +38,19 @@ class LoginActivity : AppCompatActivity() {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
-                        // Login successful, navigate to the home screen or another screen
                         startActivity(Intent(this, HomeActivity::class.java))
                         finish()
                     } else {
-                        // TODO
-                        // If sign-in fails, display a message to the user.
-                        // You can customize this part based on your UI requirements.
-                        // For example, show an error message on the screen.
-                        // Feel free to add more detailed error handling if needed.
+                        Toast.makeText(
+                            this, "Authentication failed. Please check your email and password.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
+        }
+
+        registerButton.setOnClickListener {
+            startActivity(Intent(this, RegisterActivity::class.java))
         }
     }
 }

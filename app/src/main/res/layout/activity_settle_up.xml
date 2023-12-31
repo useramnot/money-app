@@ -6,6 +6,13 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <Button
+        android:id="@+id/imageButtonBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onBackButtonClick"
+        android:text="@string/back_button" />
+
     <ListView
         android:id="@+id/listViewSettleUpParticipants"
         android:layout_width="match_parent"

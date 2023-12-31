@@ -1,16 +1,17 @@
 <resources>
-    <string name="app_name" translatable="false">Money App</string>
+    <string name="app_name" translatable="false">Billy</string>
     <string name="expense_name_placeholder" translatable="false">Expense Name</string>
     <string name="expense_details_placeholder">Participants: %1$s - Amount: $%2$.2f</string>
     <string name="group_name_placeholder" translatable="false">Group Name</string>
     <string name="group_description_placeholder" translatable="false">Group Description</string>
+    <string name="group_summary_placeholder" translatable="false">Group Summary</string>
     <string name="settle_up_button">Settle Up</string>
     <string name="back_button">Back</string>
     <string name="overall_owing_placeholder">Overall Owing: $%1$.2f</string>
     <string name="group_name">Group Name</string>
     <string name="group_description">Group Description</string>
     <string name="add_participants">Add Participants</string>
-    <string name="create_group">Create Group</string>
+    <string name="create_group">Create</string>
     <string name="group_settings">Settings</string>
     <string name="save_changes">Save Changes</string>
     <string name="add_participant">Add Participant</string>
@@ -22,4 +23,35 @@
     <string name="remind">Remind</string>
     <string name="you_are_settled_up">You are settled up.</string>
     <string name="enter_participant_s_email">Enter participant\'s email</string>
+    <string name="add_expense">Add Expense</string>
+    <string name="search_groups">Search Groups</string>
+    <string name="app_logo">App Logo</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="notification_settings">Notification Settings</string>
+    <string name="change_profile">Change Profile</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="register">Register</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="name">Name</string>
+    <string name="repeat_email">Repeat Email</string>
+    <string name="repeat_password">Repeat password</string>
+    <string name="emails_do_not_match">Emails do not match</string>
+    <string name="passwords_do_not_match">Passwords do not match</string>
+    <string name="reset_password">Reset password</string>
+    <string name="group_name_cannot_be_empty">Group name cannot be empty</string>
+    <string name="edit_group_details">Edit group details</string>
+    <string name="default_username">Username</string>
+    <string name="new_name">New name</string>
+    <string name="new_email">New email</string>
+    <string name="new_password">New password</string>
+    <string name="expense_reminders">Expense Reminders</string>
+    <string name="group_updates">Group Updates</string>
+    <string name="new_expense_notification">New Expense Notification</string>
+    <string name="amount">Amount</string>
+    <string name="description">Description</string>
+    <string name="choose_payer">Choose Payer</string>
+    <string name="choose_participants">Choose Participants</string>
+    <string name="save_expense">Save Expense</string>
 </resources>

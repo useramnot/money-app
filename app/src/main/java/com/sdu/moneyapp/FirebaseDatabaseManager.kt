@@ -20,7 +20,13 @@ object FirebaseDatabaseManager {
         expensesRef.child(expense.id).setValue(expense)
     }
 
+    // Function to add/update owed amounts for an expense
+    fun updateOwedAmounts(expenseId: String, owedAmounts: Map<String, Double>) {
+        expensesRef.child(expenseId).child("owedAmounts").setValue(owedAmounts)
+    }
+
     fun getExpenses(callback: (List<Expense>) -> Unit) {
+        // TODO: muszę przez to jeszcze raz przejść
         expensesRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val expenses = snapshot.children.mapNotNull { it.getValue(Expense::class.java) }
@@ -35,6 +41,7 @@ object FirebaseDatabaseManager {
     }
 
     fun getOverallOwing(userUid: String, callback: (Double) -> Unit) {
+        // TODO: nie ufam temu kurwa muszę to policzyć sama
         val expensesRef: DatabaseReference = database.reference.child("expenses")
 
         expensesRef.orderByChild("participants/$userUid").equalTo(true)
@@ -107,5 +114,9 @@ object FirebaseDatabaseManager {
                     // Handle the error, e.g., display an error message
                 }
             })
+    }
+
+    fun settleUpForUserInGroup(currentUserUid: String, groupId: String, function: () -> Unit) {
+        // TODO: update expenses
     }
 }

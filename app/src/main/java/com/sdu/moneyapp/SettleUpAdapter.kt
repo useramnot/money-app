@@ -45,6 +45,17 @@ class SettleUpAdapter(
             textViewSettledUp.visibility = View.VISIBLE
         }
 
+        // Inside your SettleUpAdapter class
+
+        buttonSettleUp.setOnClickListener {
+            if (participantUid != null) {
+                // Call the onSettleUpClick callback with isOwed as false
+                onSettleUpClick(participantUid, false)
+            }
+        }
+
+
         return view
     }
+
 }

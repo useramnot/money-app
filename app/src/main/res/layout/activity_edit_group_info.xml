@@ -7,41 +7,32 @@
     android:padding="16dp">
 
     <Button
-        android:id="@+id/imageButtonBack"
+        android:id="@+id/buttonBack"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="onBackButtonClick"
-        android:text="@string/back_button" />
+        android:text="@string/back_button"
+        android:layout_marginTop="16dp"/>
 
     <EditText
         android:id="@+id/editTextGroupName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/group_name"
+        android:hint="@string/new_group_name"
         android:inputType="text"
         android:autofillHints="" />
-
-<!--    <TextView-->
-<!--        android:id="@+id/groupNameEmpty"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginTop="8dp"-->
-<!--        android:text="@string/group_name_cannot_be_empty"-->
-<!--        android:textColor="@android:color/holo_red_dark"-->
-<!--        android:visibility="gone" />-->
 
     <EditText
         android:id="@+id/editTextGroupDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/group_description"
+        android:hint="@string/new_group_description"
         android:inputType="text"
         android:autofillHints="" />
 
     <Button
-        android:id="@+id/buttonCreateGroup"
-        android:layout_width="match_parent"
+        android:id="@+id/buttonSaveChanges"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/create_group"/>
+        android:text="@string/save_changes"
+        android:layout_marginTop="16dp"/>
 </LinearLayout>
-

@@ -25,7 +25,6 @@ class GroupOverviewActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_group_overview)
-
         textViewGroupName = findViewById(R.id.textViewGroupName)
         textViewGroupDescription = findViewById(R.id.textViewGroupDescription)
         textViewMySummary = findViewById(R.id.textViewMySummary)
@@ -46,9 +45,9 @@ class GroupOverviewActivity : AppCompatActivity() {
 
         // Settle Up Button Click Listener
         buttonSettleUp.setOnClickListener {
-            // TODO
-            // Implement the logic for settling up
-            // This could involve updating the database and refreshing the UI
+            databaseManager.settleUpForUserInGroup(currentUserUid, groupId) {
+                fetchAndDisplayExpenses(groupId)
+            }
         }
 
         val buttonGroupSettings: Button = findViewById(R.id.buttonGroupSettings)
@@ -67,31 +66,35 @@ class GroupOverviewActivity : AppCompatActivity() {
             val expenseAdapter = ExpenseAdapter(this, expenses)
             listViewExpenses.adapter = expenseAdapter
 
-            // Calculate and display group summary based on user's expenses
             val groupSummary = calculateGroupSummary(expenses)
             textViewMySummary.text = groupSummary
         }
     }
 
     private fun calculateGroupSummary(expenses: List<Expense>): String {
-        val totalOwed = expenses.filter { it.payerUid == currentUserUid }.sumOf { it.amount }
-        val totalOwing =
-            expenses.filter { currentUserUid in it.participants && it.payerUid != currentUserUid }
-                .sumOf { it.amount }
-        // TODO: it should show only one option, i.e. if you are owed or you owe or you are settled up
-        return "You Owe: $$totalOwing\nYou Are Owed: $$totalOwed\nYou Are Settled Up: ${totalOwed - totalOwing}"
+        val totalOwed = expenses
+            .filter { currentUserUid in it.owedAmounts }
+            .sumOf { it.owedAmounts[currentUserUid] ?: 0.0 }
+
+        val totalOwing = expenses
+            .filter { it.payerUid == currentUserUid }
+            .sumOf { it.amount } - expenses
+            .filter { currentUserUid in it.participants && it.payerUid == currentUserUid }
+            .sumOf { it.amount }
+
+        val balance = totalOwed - totalOwing
+
+        return when {
+            balance > 0 -> "You Are Owed: $$balance"
+            balance < 0 -> "You Owe: $${-balance}"
+            else -> "You Are Settled Up"
+        }
     }
 
-    // Back Button Click Listener
+
     fun onBackButtonClick(view: View) {
         finish()
     }
 
-    // Settle Up Button Click Listener
-    fun onSettleUpButtonClick(view: View) {
-        // TODO
-        // Implement the logic for settling up
-        // This could involve updating the database and refreshing the UI
-    }
 
 }

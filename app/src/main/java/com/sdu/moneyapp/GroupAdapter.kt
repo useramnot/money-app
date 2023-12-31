@@ -8,7 +8,7 @@ import android.widget.ArrayAdapter
 import android.widget.TextView
 import com.sdu.moneyapp.model.Group
 
-class GroupAdapter(context: Context, groups: List<Group>) :
+class GroupAdapter(context: Context, private var groups: List<Group>) :
     ArrayAdapter<Group>(context, 0, groups) {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -22,12 +22,23 @@ class GroupAdapter(context: Context, groups: List<Group>) :
         val groupNameTextView: TextView = itemView!!.findViewById(R.id.textViewGroupName)
         val groupSummaryTextView: TextView = itemView.findViewById(R.id.textViewGroupSummary)
 
-        groupNameTextView.text = currentGroup?.name
-        // TODO
-        // Implement your app's logic to calculate and display the group summary
-        // This can involve calculating and formatting the summary based on your app's requirements
-        groupSummaryTextView.text = "Summary: $0.00"
+        // Update the TextViews with actual data or placeholders
+        groupNameTextView.text = currentGroup?.name ?: context.getString(R.string.group_name_placeholder)
+        groupSummaryTextView.text = calculateGroupSummary(currentGroup)
 
         return itemView
     }
+
+    private fun calculateGroupSummary(group: Group?): String {
+        // TODO: Implement your app's logic to calculate and format the group summary
+        // For example, you can calculate the total expenses and display it as "$X.XX"
+        return context.getString(R.string.group_summary_placeholder)
+    }
+
+    fun updateGroups(newGroups: List<Group>) {
+        groups = newGroups
+        notifyDataSetChanged()
+    }
 }
+
+

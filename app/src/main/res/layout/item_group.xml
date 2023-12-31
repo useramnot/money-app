@@ -11,11 +11,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="18sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:text="@string/group_name_placeholder" />
 
     <TextView
         android:id="@+id/textViewGroupSummary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="14sp"/>
+        android:textSize="14sp"
+        android:text="@string/group_summary_placeholder" />
 </LinearLayout>

@@ -71,6 +71,9 @@ dependencies {
     implementation("com.google.firebase:firebase-database-ktx:20.3.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("androidx.databinding:databinding-runtime:8.2.0")
+    implementation("com.google.android.material:material:1.11.0")
+    implementation("com.google.firebase:firebase-messaging:23.4.0")
 
 
     testImplementation("junit:junit:4.13.2")

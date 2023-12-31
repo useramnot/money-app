@@ -5,5 +5,8 @@ data class Expense(
     val amount: Double,
     val description: String,
     val payerUid: String, // UID of the user who paid the expense
-    val participants: List<String> // List of UIDs of users who participated in the expense
+    val participants: List<String>, // List of UIDs of users who participated in the expense
+    val owedAmounts: Map<String, Double> // Map of user UIDs to the amount owed by each user
 )
+
+

@@ -18,8 +18,7 @@
         android:id="@+id/buttonGroupSettings"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/group_settings"
-        android:onClick="onGroupSettingsClick"/>
+        android:text="@string/group_settings"/>
 
     <!-- Group Details -->
     <TextView
@@ -42,6 +41,7 @@
         android:id="@+id/textViewMySummary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="@string/group_summary_placeholder"
         android:layout_marginTop="8dp"/>
 
     <!-- Settle Up Button -->
@@ -50,7 +50,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/settle_up_button"
-        android:onClick="onSettleUpButtonClick"
         android:layout_marginTop="16dp"/>
 
     <!-- List of Expenses -->
