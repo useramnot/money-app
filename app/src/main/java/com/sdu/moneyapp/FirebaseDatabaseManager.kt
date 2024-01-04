@@ -1,5 +1,6 @@
 package com.sdu.moneyapp
 
+import android.widget.Toast
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -12,8 +13,8 @@ object FirebaseDatabaseManager {
 
     private val database: FirebaseDatabase by lazy { FirebaseDatabase.getInstance() }
 
-    // Reference to the "expenses" node in the database
     private val expensesRef: DatabaseReference by lazy { database.reference.child("expenses") }
+    private val groupsRef: DatabaseReference by lazy { database.reference.child("groups") }
 
     // Function to add an expense to the database
     fun addExpense(expense: Expense) {
@@ -26,7 +27,7 @@ object FirebaseDatabaseManager {
     }
 
     fun getExpenses(callback: (List<Expense>) -> Unit) {
-        // TODO: muszę przez to jeszcze raz przejść
+        // TODO
         expensesRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val expenses = snapshot.children.mapNotNull { it.getValue(Expense::class.java) }
@@ -41,7 +42,7 @@ object FirebaseDatabaseManager {
     }
 
     fun getOverallOwing(userUid: String, callback: (Double) -> Unit) {
-        // TODO: nie ufam temu kurwa muszę to policzyć sama
+        // TODO
         val expensesRef: DatabaseReference = database.reference.child("expenses")
 
         expensesRef.orderByChild("participants/$userUid").equalTo(true)
@@ -110,13 +111,27 @@ object FirebaseDatabaseManager {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    // TODO
-                    // Handle the error, e.g., display an error message
+                    TODO("handle error")
                 }
             })
     }
 
     fun settleUpForUserInGroup(currentUserUid: String, groupId: String, function: () -> Unit) {
         // TODO: update expenses
+    }
+
+
+    fun getGroupParticipants(groupId: String, callback: (List<String>) -> Unit) {
+        groupsRef.child(groupId).child("participants")
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val participants = snapshot.children.mapNotNull { it.key }
+                    callback(participants)
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // TODO: Handle the error
+                }
+            })
     }
 }

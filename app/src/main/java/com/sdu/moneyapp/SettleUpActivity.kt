@@ -37,10 +37,8 @@ class SettleUpActivity : AppCompatActivity() {
             settleUpOrRemind(participantUid, isOwed)
         }
 
-        // Set up the ListView for settle up participants
         listViewParticipants.adapter = settleUpAdapter
 
-        // Load and display settle up participants
         loadSettleUpParticipants()
     }
 
@@ -67,7 +65,6 @@ class SettleUpActivity : AppCompatActivity() {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Handle error
                 Toast.makeText(this@SettleUpActivity, "Error loading settle up participants", Toast.LENGTH_SHORT).show()
             }
         })

@@ -54,4 +54,12 @@
     <string name="choose_payer">Choose Payer</string>
     <string name="choose_participants">Choose Participants</string>
     <string name="save_expense">Save Expense</string>
+    <string name="payer">Payer:</string>
+    <string name="amount2">Amount:</string>
+    <string name="provide_amount">Provide amount</string>
+    <string name="currency">Currency:</string>
+    <string name="description2">Description:</string>
+    <string name="participants">Participants:</string>
+    <string name="enter_amount">Enter Amount</string>
+    <string name="save">Save</string>
 </resources>
