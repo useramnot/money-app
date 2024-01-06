@@ -1,4 +1,4 @@
-package com.sdu.moneyapp
+package com.sdu.moneyapp.activities
 
 import android.os.Bundle
 import android.widget.ArrayAdapter
@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.sdu.moneyapp.R
 import com.sdu.moneyapp.model.Expense
 
 class AddExpenseActivity : AppCompatActivity() {
@@ -48,6 +49,7 @@ class AddExpenseActivity : AppCompatActivity() {
             saveExpense()
         }
     }
+
 
     private fun loadGroupParticipants() {
         val participantsReference = databaseReference.child("groupParticipants").child(groupId)

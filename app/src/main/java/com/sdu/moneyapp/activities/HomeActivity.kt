@@ -1,10 +1,9 @@
-package com.sdu.moneyapp
+package com.sdu.moneyapp.activities
 
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -12,6 +11,9 @@ import android.widget.ListView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.sdu.moneyapp.FirebaseDatabaseManager
+import com.sdu.moneyapp.GroupAdapter
+import com.sdu.moneyapp.R
 import com.sdu.moneyapp.model.Group
 
 class HomeActivity : AppCompatActivity() {
@@ -42,7 +44,7 @@ class HomeActivity : AppCompatActivity() {
 
         val currentUserUid = auth.currentUser?.uid
         if (currentUserUid != null) {
-            databaseManager.getOverallOwing(currentUserUid) { owingAmount ->
+            FirebaseDatabaseManager.getOverallOwing(currentUserUid) { owingAmount ->
                 val formattedText = getString(R.string.overall_owing_placeholder, owingAmount)
                 textViewOverallOwing.text = formattedText
             }
@@ -58,7 +60,7 @@ class HomeActivity : AppCompatActivity() {
 
         // Retrieve and display list of groups
         if (currentUserUid != null) {
-            databaseManager.getGroupsForUser(currentUserUid) { groups ->
+            FirebaseDatabaseManager.getGroupsForUser(currentUserUid) { groups ->
                 originalGroups = groups
                 groupAdapter = GroupAdapter(this, originalGroups)
                 listViewGroups.adapter = groupAdapter
@@ -88,7 +90,7 @@ class HomeActivity : AppCompatActivity() {
 
             val intent = Intent(this, GroupOverviewActivity::class.java)
 
-            intent.putExtra("groupId", selectedGroup.id)
+            intent.putExtra("groupId", selectedGroup.uid)
             intent.putExtra("groupName", selectedGroup.name)
             intent.putExtra("groupDescription", selectedGroup.groupDescription)
 

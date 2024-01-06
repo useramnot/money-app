@@ -1,8 +1,8 @@
-package com.sdu.moneyapp
+package com.sdu.moneyapp.databases
 
 import com.google.firebase.auth.FirebaseAuth
 
-object FirebaseAuthenticationManager {
+object AuthenticationManager {
 
     // Get Firebase Auth instance
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }

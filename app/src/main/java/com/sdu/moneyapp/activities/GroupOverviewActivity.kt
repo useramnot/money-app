@@ -1,14 +1,16 @@
-package com.sdu.moneyapp
+package com.sdu.moneyapp.activities
 
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import android.widget.ImageButton
 import android.widget.ListView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.sdu.moneyapp.ExpenseAdapter
+import com.sdu.moneyapp.FirebaseDatabaseManager
+import com.sdu.moneyapp.R
 import com.sdu.moneyapp.model.Expense
 
 class GroupOverviewActivity : AppCompatActivity() {
@@ -45,7 +47,7 @@ class GroupOverviewActivity : AppCompatActivity() {
 
         // Settle Up Button Click Listener
         buttonSettleUp.setOnClickListener {
-            databaseManager.settleUpForUserInGroup(currentUserUid, groupId) {
+            FirebaseDatabaseManager.settleUpForUserInGroup(currentUserUid, groupId) {
                 fetchAndDisplayExpenses(groupId)
             }
         }
@@ -62,7 +64,7 @@ class GroupOverviewActivity : AppCompatActivity() {
 
 
     private fun fetchAndDisplayExpenses(groupId: String) {
-        databaseManager.getExpensesForUserInGroup(currentUserUid, groupId) { expenses ->
+        FirebaseDatabaseManager.getExpensesForUserInGroup(currentUserUid, groupId) { expenses ->
             val expenseAdapter = ExpenseAdapter(this, expenses)
             listViewExpenses.adapter = expenseAdapter
 

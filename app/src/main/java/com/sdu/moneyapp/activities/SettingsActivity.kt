@@ -1,4 +1,4 @@
-package com.sdu.moneyapp
+package com.sdu.moneyapp.activities
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,6 +8,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.sdu.moneyapp.R
 import com.sdu.moneyapp.model.User
 
 class SettingsActivity : AppCompatActivity() {

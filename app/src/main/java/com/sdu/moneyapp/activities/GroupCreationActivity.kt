@@ -1,13 +1,14 @@
-package com.sdu.moneyapp
+package com.sdu.moneyapp.activities
 
-import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import com.sdu.moneyapp.R
+import com.sdu.moneyapp.databases.AuthenticationManager
+import com.sdu.moneyapp.databases.GroupDatabase
 import com.sdu.moneyapp.model.Group
 
 class GroupCreationActivity : AppCompatActivity() {
@@ -15,8 +16,6 @@ class GroupCreationActivity : AppCompatActivity() {
     private lateinit var editTextGroupName: EditText
     private lateinit var editTextGroupDescription: EditText
     private lateinit var buttonCreateGroup: Button
-
-    private val database = FirebaseDatabase.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,7 +34,7 @@ class GroupCreationActivity : AppCompatActivity() {
                 editTextGroupName.error = "Group Name is required."
                 return@setOnClickListener
             }
-
+            /*
             // Create a new group in the database
             val groupReference = database.reference.child("groups").push()
             val groupId = groupReference.key ?: ""
@@ -45,6 +44,9 @@ class GroupCreationActivity : AppCompatActivity() {
 
             val group = Group(groupId, groupName, groupDescription, participants)
             groupReference.setValue(group)
+            */
+
+            GroupDatabase.createGroup(groupName, groupDescription, listOf(AuthenticationManager.getCurrentUserUid() ?: ""));
 
             finish()
         }

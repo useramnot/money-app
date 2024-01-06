@@ -1,58 +1,56 @@
 package com.sdu.moneyapp
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
-import android.os.Build
-import androidx.core.app.NotificationCompat
-import com.google.firebase.messaging.FirebaseMessagingService
+import android.util.Log
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
+import com.google.firebase.messaging.FirebaseMessagingService as GoogleFirebaseMessagingService
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.RemoteMessage
-import com.sdu.moneyapp.MainActivity
-import com.sdu.moneyapp.R
 
-class MyFirebaseMessagingService : FirebaseMessagingService() {
+class NotificationsManager : GoogleFirebaseMessagingService() {
 
-    // TODO(napraw to kurwa)
-    override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        // Extract data from the message
-        val title = remoteMessage.data["title"]
-        val body = remoteMessage.data["body"]
-
-        // Show a notification
-        showNotification(title, body)
+    fun getToken() {
+//        FirebaseMessaging.getInstance().token
+//            .addOnSuccessListener (OnSuccessListener { task ->
+//                // Get new FCM registration token
+//                val token = task.result
+//                val msg = getString(R.string.msg_token_fmt, token)
+//                Log.d(TAG, msg)
+//                // TODO: toast
+//            })
+//            .addOnFailureListener(OnFailureListener { task ->
+//                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
+//                // TODO?: toast
+//            })
     }
 
-    private fun showNotification(title: String?, body: String?) {
-        val channelId = "expense_notification_channel"
-        val notificationId = 1
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        // TODO:
 
-        val intent = Intent(this, MainActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0, intent,
-            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
-        )
+        // Handle FCM messages here
+        Log.d(TAG, "From: ${remoteMessage.from}")
 
-        val notificationBuilder = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle(title)
-            .setContentText(body)
-            .setAutoCancel(true)
-            .setContentIntent(pendingIntent)
+        // Check if the message contains data
+        remoteMessage.data.isNotEmpty().let {
+            Log.d(TAG, "Message data payload: " + remoteMessage.data)
+        }
 
-        val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        // Check if the message contains a notification payload
+        remoteMessage.notification?.let {
+            Log.d(TAG, "Message Notification Body: ${it.body}")
+        }
+    }
 
-        // Check if the device is running Android Oreo or higher and create a notification channel
-        val channel = NotificationChannel(
-            channelId,
-            "Expense Notification Channel",
-            NotificationManager.IMPORTANCE_DEFAULT
-        )
-        notificationManager.createNotificationChannel(channel)
+    override fun onNewToken(token: String) {
+        Log.d(TAG, "Refreshed token: $token")
+    }
 
-        notificationManager.notify(notificationId, notificationBuilder.build())
+    fun sendNotification() {
+        // TODO
+    }
+
+    companion object {
+        private const val TAG = "MoneyAppFirebaseMsgService"
     }
 }

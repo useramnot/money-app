@@ -1,4 +1,4 @@
-package com.sdu.moneyapp.classes
+package com.sdu.moneyapp.databases
 
 import java.util.Date
 
@@ -6,8 +6,8 @@ class Expense (
     val description : String,
     val amount : Double,
     val date : Date,
-    val payee : User,
-    var payers : List<User>)
+    val payee : UserDatabase,
+    var payers : List<UserDatabase>)
 {
 
 }

@@ -14,16 +14,29 @@
         >
         <activity
             android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.MoneyApp">
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".activities.RegisterActivity" />
+        <activity android:name=".activities.AddExpenseActivity" />
+        <activity android:name=".activities.AddParticipantsActivity" />
+        <activity android:name=".activities.ChangeProfileActivity" />
+        <activity android:name=".activities.EditGroupInfoActivity" />
+        <activity android:name=".activities.ForgotPasswordActivity" />
+        <activity android:name=".activities.GroupCreationActivity" />
+        <activity android:name=".activities.GroupOverviewActivity" />
+        <activity android:name=".activities.GroupSettingsActivity" />
+        <activity android:name=".activities.HomeActivity" />
+        <activity android:name=".activities.LoginActivity" />
+        <activity android:name=".activities.NotificationSettingsActivity" />
+        <activity android:name=".activities.SettingsActivity" />
+        <activity android:name=".activities.SettleUpActivity" />
+        <activity android:name=".activities.SettleUpDetailsActivity" />
         <service
-            android:name=".MyFirebaseMessagingService"
+            android:name=".FirebaseMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

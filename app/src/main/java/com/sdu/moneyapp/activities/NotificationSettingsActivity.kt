@@ -1,4 +1,4 @@
-package com.sdu.moneyapp
+package com.sdu.moneyapp.activities
 
 import android.os.Bundle
 import android.widget.Button
@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.sdu.moneyapp.R
 
 class NotificationSettingsActivity : AppCompatActivity() {
 

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context=".LoginActivity">
+    tools:context=".activities.LoginActivity">
 
     <ImageView
         android:id="@+id/imageViewLogo"
@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:src="@drawable/ic_logo"
         android:contentDescription="@string/app_logo"
-        android:clickable="true"/>
+        android:clickable="false"/>
 
     <EditText
         android:id="@+id/editTextEmail"
@@ -51,3 +51,4 @@
         android:text="@string/register"/>
 
 </LinearLayout>
+
