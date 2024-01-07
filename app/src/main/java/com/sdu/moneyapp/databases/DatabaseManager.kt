@@ -3,7 +3,8 @@ package com.sdu.moneyapp.databases
 import com.google.firebase.firestore.*
 
 open class DatabaseManager {
-    final val database = FirebaseFirestore.getInstance()
+    val database = FirebaseFirestore.getInstance()
+    val SUITABLE_AGE = 10000 // 10 seconds
 
     fun getUsersCollection() : CollectionReference{
         return database.collection("users")

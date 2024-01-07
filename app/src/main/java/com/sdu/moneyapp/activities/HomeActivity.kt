@@ -1,105 +1,166 @@
 package com.sdu.moneyapp.activities
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.ListView
-import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.auth.FirebaseAuth
-import com.sdu.moneyapp.FirebaseDatabaseManager
-import com.sdu.moneyapp.GroupAdapter
+import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.sdu.moneyapp.R
+import com.sdu.moneyapp.databases.*
 import com.sdu.moneyapp.model.Group
+import kotlinx.coroutines.launch
 
-class HomeActivity : AppCompatActivity() {
-
-    private lateinit var textViewOverallOwing: TextView
-    private lateinit var editTextSearchGroups: EditText
-    private lateinit var buttonCreateGroup: Button
-    private lateinit var listViewGroups: ListView
-    private lateinit var buttonAddExpense: Button
-    private lateinit var imageViewLogo: ImageView
-
-    private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
-    private val databaseManager: FirebaseDatabaseManager by lazy { FirebaseDatabaseManager }
-
-    private lateinit var groupAdapter: GroupAdapter
-    private lateinit var originalGroups: List<Group>
+class HomeActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_home)
 
-        textViewOverallOwing = findViewById(R.id.textViewOverallOwing)
-        editTextSearchGroups = findViewById(R.id.editTextSearchGroups)
-        buttonCreateGroup = findViewById(R.id.buttonCreateGroup)
-        listViewGroups = findViewById(R.id.listViewGroups)
-        buttonAddExpense = findViewById(R.id.buttonAddExpense)
-        imageViewLogo = findViewById(R.id.imageViewLogo)
+        setContent(
+            content = { HomeScreen() }
+        )
+    }
 
-        val currentUserUid = auth.currentUser?.uid
-        if (currentUserUid != null) {
-            FirebaseDatabaseManager.getOverallOwing(currentUserUid) { owingAmount ->
-                val formattedText = getString(R.string.overall_owing_placeholder, owingAmount)
-                textViewOverallOwing.text = formattedText
-            }
-        }
+    private fun onLogoClick() {
+        startActivity(Intent(this, SettingsActivity::class.java))
+    }
 
-        buttonCreateGroup.setOnClickListener {
-            startActivity(Intent(this, GroupCreationActivity::class.java))
-        }
+    private fun onAddExpenseClick() {
+        startActivity(Intent(this, AddExpenseActivity::class.java))
+    }
 
-        buttonAddExpense.setOnClickListener {
-            startActivity(Intent(this, AddExpenseActivity::class.java))
-        }
+    private fun onCreateGroupClick(){
+        startActivity(Intent(this, GroupCreationActivity::class.java))
+    }
 
-        // Retrieve and display list of groups
-        if (currentUserUid != null) {
-            FirebaseDatabaseManager.getGroupsForUser(currentUserUid) { groups ->
-                originalGroups = groups
-                groupAdapter = GroupAdapter(this, originalGroups)
-                listViewGroups.adapter = groupAdapter
-            }
-        }
+    private fun onGroupClick(group : Group){
+        val intent = Intent(this, GroupOverviewActivity::class.java)
+        intent.putExtra("groupId", group.uid)
+        startActivity(intent)
+    }
 
-        editTextSearchGroups.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // Not needed for this implementation
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // Not needed for this implementation
-            }
-
-            override fun afterTextChanged(editable: Editable?) {
-                val searchText = editable.toString().trim()
-                val filteredGroups = originalGroups.filter { group ->
-                    group.name.contains(searchText, ignoreCase = true)
-                }
-                groupAdapter.updateGroups(filteredGroups)
-            }
-        })
-
-        listViewGroups.setOnItemClickListener { _, _, position, _ ->
-            val selectedGroup = listViewGroups.getItemAtPosition(position) as Group
-
-            val intent = Intent(this, GroupOverviewActivity::class.java)
-
-            intent.putExtra("groupId", selectedGroup.uid)
-            intent.putExtra("groupName", selectedGroup.name)
-            intent.putExtra("groupDescription", selectedGroup.groupDescription)
-
-            startActivity(intent)
-        }
-
-        imageViewLogo.setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
+    private fun loadGroups(list: MutableList<Group>) {
+        list.clear()
+        GroupDatabase.getGroupsByUser(AuthManager.getCurrentUserUid()) {
+            list.add(it)
+            Log.d("MYAPP", "Group " + it.name + " added to options")
         }
     }
 
+    @Preview
+    @Composable
+    fun HomeScreen() {
+
+        val groups = remember { mutableStateListOf<Group>() }
+        loadGroups(groups)
+
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxSize()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Logo (Image)
+                Image(
+                    painter = painterResource(id = R.drawable.ic_logo),
+                    contentDescription = "App Logo",
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clickable { onLogoClick() }
+                )
+
+                // App Name (Text)
+                Text(
+                    text = stringResource(id = R.string.app_name),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 16.dp),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
+
+            // Overall Owing Text
+            Text(
+                text = stringResource(id = R.string.overall_owing_placeholder),
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold
+            )
+
+            // TODO: Search Groups
+
+            // Create Group Button
+            Button(
+                onClick = { onCreateGroupClick() },
+                modifier = Modifier.padding(vertical = 8.dp)
+            ) {
+                Text(text = stringResource(id = R.string.create_group))
+            }
+
+            // List of Groups
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                items(groups) { group ->
+                    Log.d("MYAPP", "Displaying: $group")
+                    Button (
+                        onClick = { onGroupClick(group) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    ){
+                        Column {
+                            Text(
+                                text = group.name,
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Text (
+                                text = group.groupDescription,
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Add Expense Button
+            Button(
+                onClick = { onAddExpenseClick() },
+                modifier = Modifier
+                    .wrapContentWidth(align = Alignment.End)
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(text = stringResource(id = R.string.add_expense))
+            }
+        }
+    }
 }

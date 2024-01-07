@@ -7,7 +7,7 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import com.sdu.moneyapp.activities.HomeActivity
 import com.sdu.moneyapp.activities.LoginActivity
-import com.sdu.moneyapp.databases.AuthenticationManager
+import com.sdu.moneyapp.databases.AuthManager
 
 
 class MainActivity : AppCompatActivity() {
@@ -17,12 +17,8 @@ class MainActivity : AppCompatActivity() {
         FirebaseApp.initializeApp(this)
         FirebaseMessaging.getInstance().isAutoInitEnabled = true
 
-        val authManager = AuthenticationManager
-        val databaseManager = FirebaseDatabaseManager
-
         // Check if user is logged in, and redirect to HomeActivity if so, if not, LoginActivity
-        val currentUserUid = AuthenticationManager.getCurrentUserUid()
-        if (currentUserUid == null)
+        if (!AuthManager.isUserSignedIn())
             startActivity(Intent(this, LoginActivity::class.java))
         else
             startActivity(Intent(this, HomeActivity::class.java))

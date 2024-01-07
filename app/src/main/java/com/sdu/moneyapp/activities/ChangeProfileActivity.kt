@@ -1,92 +1,123 @@
 package com.sdu.moneyapp.activities
 
+import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
+import android.util.Log
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.UserProfileChangeRequest
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.*
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.sdu.moneyapp.NotificationsManager
+
 import com.sdu.moneyapp.R
+import com.sdu.moneyapp.databases.*
 
-class ChangeProfileActivity : AppCompatActivity() {
-
-    private lateinit var editTextNewName: EditText
-    private lateinit var editTextNewEmail: EditText
-    private lateinit var editTextNewPassword: EditText
-    private lateinit var buttonSaveChanges: Button
-
-    private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
+class ChangeProfileActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_change_profile)
 
-        editTextNewName = findViewById(R.id.editTextNewName)
-        editTextNewEmail = findViewById(R.id.editTextNewEmail)
-        editTextNewPassword = findViewById(R.id.editTextNewPassword)
-        buttonSaveChanges = findViewById(R.id.buttonSaveChanges)
+        setContent(
+            content = { ChangeProfileScreen() }
+        )
+    }
 
-        val buttonBack: Button = findViewById(R.id.buttonBack)
-        buttonBack.setOnClickListener {
+    private fun onBackClick() = finish()
+
+    private fun onSaveChangesClick(newName: String, newPassword: String) {
+        UserDatabase.getUserById(AuthManager.getCurrentUserUid()) {
+            // TODO: more sophisticated validation?
+            Log.d("MYAPP", "Changing user settings for " + it.name)
+            if (newName.isNotEmpty()) {
+                it.name = newName
+                Log.d("MYAPP", "Change username to $newName")
+            }
+            if (newPassword.isNotEmpty()) {
+                AuthManager.getCurrentUser()?.updatePassword(newPassword)
+                it.name = newName
+                Log.d("MYAPP", "Changed password")
+            }
+            UserDatabase.setUser(it)
             finish()
         }
-
-        buttonSaveChanges.setOnClickListener {
-            saveChanges()
-        }
     }
 
-    private fun saveChanges() {
-        val newName = editTextNewName.text.toString().trim()
-        val newEmail = editTextNewEmail.text.toString().trim()
-        val newPassword = editTextNewPassword.text.toString().trim()
+    @Composable
+    fun ChangeProfileScreen() {
+        var newName by remember { mutableStateOf("") }
+        var newPassword by remember { mutableStateOf("") }
 
-        val user = auth.currentUser
-
-        if (user != null) {
-            // Update display name
-            val profileUpdates = UserProfileChangeRequest.Builder()
-                .setDisplayName(newName)
-                .build()
-
-            user.updateProfile(profileUpdates)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        // Display name updated successfully
-                        Toast.makeText(this, "Display name updated", Toast.LENGTH_SHORT).show()
-                    } else {
-                        // Handle error updating display name
-                        Toast.makeText(this, "Error updating display name", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-            // Update email
-            if (newEmail.isNotEmpty() && newEmail != user.email) {
-                user.verifyBeforeUpdateEmail(newEmail)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            Toast.makeText(this, "Email updated", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(this, "Error updating email", Toast.LENGTH_SHORT).show()
-                        }
-                    }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Top
+        ) {
+            // Back Button
+            Button(
+                onClick = { onBackClick() },
+                modifier = Modifier
+                    .wrapContentWidth(align = Alignment.End)
+                    .padding(top = 16.dp)
+            ) {
+                Text(text = stringResource(id = R.string.back_button))
             }
 
-            // Update password
-            if (newPassword.isNotEmpty()) {
-                user.updatePassword(newPassword)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            // Password updated successfully
-                            Toast.makeText(this, "Password updated", Toast.LENGTH_SHORT).show()
-                        } else {
-                            // Handle error updating password
-                            Toast.makeText(this, "Error updating password", Toast.LENGTH_SHORT).show()
-                        }
-                    }
+            // New Name EditText
+            TextField(
+                value = newName,
+                onValueChange = { newName = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                label = { Text(text = stringResource(id = R.string.new_name)) },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Text
+                )
+            )
+
+            // New Password EditText
+            TextField(
+                value = newPassword,
+                onValueChange = { newPassword = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                label = { Text(text = stringResource(id = R.string.new_password)) },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Password
+                )
+            )
+
+            // Save Changes Button
+            Button(
+                onClick = { onSaveChangesClick(newName, newPassword) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            ) {
+                Text(text = stringResource(id = R.string.save_changes))
             }
         }
     }
-
 }

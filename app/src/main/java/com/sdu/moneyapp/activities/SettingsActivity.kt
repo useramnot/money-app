@@ -2,90 +2,98 @@ package com.sdu.moneyapp.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
+import androidx.compose.material3.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.*
 import com.sdu.moneyapp.R
-import com.sdu.moneyapp.model.User
+import com.sdu.moneyapp.databases.AuthManager
+import com.sdu.moneyapp.databases.UserDatabase
 
-class SettingsActivity : AppCompatActivity() {
-
-    private lateinit var buttonBack: Button
-    private lateinit var textViewUserName: TextView
-    private lateinit var buttonChangeProfile: Button
-    private lateinit var buttonNotificationSettings: Button
-    private lateinit var buttonSignOut: Button
-
-    private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
-    private val databaseReference: DatabaseReference by lazy { FirebaseDatabase.getInstance().reference }
+class SettingsActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
+        setContent(
+            content = { SettingsScreen() }
+        )
+    }
 
-        buttonBack = findViewById(R.id.buttonBack)
-        textViewUserName = findViewById(R.id.textViewUserName)
-        buttonChangeProfile = findViewById(R.id.buttonChangeProfile)
-        buttonNotificationSettings = findViewById(R.id.buttonNotificationSettings)
-        buttonSignOut = findViewById(R.id.buttonSignOut)
+    private fun onChangeProfileClick() {
+        startActivity(Intent(this, ChangeProfileActivity::class.java))
+    }
 
-        // Retrieve and set the user name
-        val currentUserUid = auth.currentUser?.uid
-        currentUserUid?.let { uid ->
-            val userReference = databaseReference.child("users").child(uid)
+    private fun onNotificationSettingsClick() {
+        startActivity(Intent(this, NotificationSettingsActivity::class.java))
+    }
 
-            userReference.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        val user = dataSnapshot.getValue(User::class.java)
-                        user?.let {
-                            val username = it.name
-                            textViewUserName.text = username ?: "Username"
-                        } ?: run {
-                            textViewUserName.setText(R.string.default_username)
-                        }
-                    } else {
-                        textViewUserName.setText(R.string.default_username)
-                    }
-                }
+    private fun onSignOutClick() {
+        AuthManager.signOutUser()
+        startActivity(Intent(this, LoginActivity::class.java))
+    }
 
-                override fun onCancelled(databaseError: DatabaseError) {
-                    textViewUserName.setText(R.string.default_username)
-                }
-            })
+    @Preview
+    @Composable
+    fun SettingsScreen() {
+        var username by remember { mutableStateOf("Username") }
+        UserDatabase.getUserById(AuthManager.getCurrentUserUid()) { user ->
+            username = user.name
         }
 
-
-        buttonBack.setOnClickListener {
-            finish()
-        }
-
-        buttonChangeProfile.setOnClickListener {
-            startActivity(Intent(this, ChangeProfileActivity::class.java))
-        }
-
-        buttonNotificationSettings.setOnClickListener {
-            startActivity(Intent(this, NotificationSettingsActivity::class.java))
-        }
-
-        buttonSignOut.setOnClickListener {
-            val alertDialogBuilder = AlertDialog.Builder(this)
-            alertDialogBuilder.setTitle("Sign Out")
-            alertDialogBuilder.setMessage("Are you sure you want to sign out?")
-            alertDialogBuilder.setPositiveButton("Yes") { _, _ ->
-                auth.signOut()
-                startActivity(Intent(this, LoginActivity::class.java))
-                finish()
-            }
-            alertDialogBuilder.setNegativeButton("No") { dialog, _ ->
-                dialog.dismiss()
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxSize()
+        ) {
+            // Back Button
+            Button(
+                onClick = { finish() },
+                modifier = Modifier.padding(vertical = 8.dp)
+            ) {
+                Text(text = stringResource(id = R.string.back_button))
             }
 
-            val alertDialog = alertDialogBuilder.create()
-            alertDialog.show()
+            // Profile Picture and User Name
+            Text(
+                text = username.toString(),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+
+            // Change Profile Option
+            Button(
+                onClick = { onChangeProfileClick() },
+                modifier = Modifier.padding(top = 16.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(text = stringResource(id = R.string.change_profile))
+            }
+
+            // Notification Settings Option
+            Button(
+                onClick = { onNotificationSettingsClick() },
+                modifier = Modifier.padding(top = 16.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(text = stringResource(id = R.string.notification_settings))
+            }
+
+            // Sign Out Button
+            Button(
+                onClick = { onSignOutClick() },
+                modifier = Modifier.padding(top = 32.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(text = stringResource(id = R.string.sign_out))
+            }
         }
     }
 }
