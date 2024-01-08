@@ -11,12 +11,13 @@ object ExpenseDatabase : DatabaseManager()
 
     fun createExpense(amount: Double, description: String, creator: String, groupId: String, participants: List<String>) {
         val id = getExpensesCollection().document().id
-        setExpense(Expense(id, amount, description, creator, groupId, System.currentTimeMillis(), participants))
-        val owed = amount / (participants.size + 1)
+        val otherParticipants = participants.minus(creator)
+        setExpense(Expense(id, amount, description, creator, groupId, System.currentTimeMillis(), otherParticipants))
+        val owed = amount / (otherParticipants.size + 1)
         GroupDatabase.getGroupById(groupId) { group ->
             group.addExpense(id)
             GroupDatabase.setGroup(group)
-            for (user in participants) {
+            for (user in otherParticipants) {
                 BalanceDatabase.user1OwesUser2Amount(groupId, user, creator, owed)
             }
         }

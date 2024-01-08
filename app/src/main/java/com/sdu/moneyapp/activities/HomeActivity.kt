@@ -113,7 +113,7 @@ class HomeActivity : ComponentActivity() {
 
             // Overall Owing Text
             Text(
-                text = oweText ,
+                text = oweText,
                 modifier = Modifier.padding(vertical = 8.dp),
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.bodyLarge,

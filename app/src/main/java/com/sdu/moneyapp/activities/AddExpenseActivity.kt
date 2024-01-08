@@ -72,7 +72,7 @@ class AddExpenseActivity : ComponentActivity() {
         )
 
         // TODO: Notify participants
-        MessagingService.sendNotification()
+        // MessagingService.sendNotification()
 
         finish()
     }
@@ -120,7 +120,7 @@ class AddExpenseActivity : ComponentActivity() {
                         "1",
                         "Test Group",
                         "Test Description",
-                        listOf()
+                        setOf()
                     )
                 )
             }

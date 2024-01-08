@@ -1,5 +1,6 @@
 package com.sdu.moneyapp.databases
 
+import android.util.Log
 import com.google.firebase.firestore.*
 import com.sdu.moneyapp.model.User
 
@@ -54,6 +55,9 @@ public object UserDatabase : DatabaseManager() {
     fun getUserByEmail(userEmail : String, callback: (User?) -> Unit = {}) {
         getUsersCollection().whereEqualTo("email", userEmail).get()
             .addOnSuccessListener { documents ->
+                documents.forEach {
+                    Log.d("MYAPP", "Document: $it")
+                }
                 if (documents.size() == 0) callback(null)
                 else {
                     val user = documents.elementAt(0).toObject(User::class.java)

@@ -12,7 +12,7 @@ object GroupDatabase : DatabaseManager() {
     private val savedGroups = mutableMapOf<String, Group>()
     private val savedGroupsAge = mutableMapOf<String, Long>()
     
-    fun createGroup(name : String, desc : String, participants : List<String>, callback: (String) -> Unit = {}) {
+    fun createGroup(name : String, desc : String, participants : Set<String>, callback: (String) -> Unit = {}) {
         val id = getGroupsCollection().document().id
         setGroup(Group(id, name, desc, participants)){ callback(id) }
     }

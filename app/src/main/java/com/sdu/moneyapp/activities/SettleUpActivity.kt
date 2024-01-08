@@ -78,7 +78,7 @@ class SettleUpActivity : ComponentActivity() {
 
             // Group Details
             Text(
-                text = groupName + " members' debts with you",
+                text = "Your debts with other users in $groupName",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(top = 8.dp)

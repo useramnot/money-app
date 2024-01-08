@@ -29,6 +29,7 @@ object BalanceDatabase : DatabaseManager() {
         //If amount is positive, user1 owes user2
         //If amount is negative, user2 owes user1
         var switch = false
+        if (user1 == user2) return
         if (user1 > user2) switch = true
         val u1 = if (switch) user2 else user1
         val u2 = if (switch) user1 else user2

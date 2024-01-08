@@ -63,6 +63,7 @@ class GroupSettingsActivity : ComponentActivity() {
 
     private fun onRemoveParticipantClick(participantUid: String) {
         group.participants.remove(participantUid)
+        GroupDatabase.setGroup(group)
         resetActivity()
     }
 
@@ -120,7 +121,7 @@ class GroupSettingsActivity : ComponentActivity() {
                 )
             )
 
-            // Add PArticipants Button
+            // Add Participants Button
             Button(
                 onClick = { onAddParticipantsClick() },
                 modifier = Modifier
@@ -130,18 +131,22 @@ class GroupSettingsActivity : ComponentActivity() {
                 Text(text = "Add Participants")
             }
 
-            // List of Expenses
+            // List of participants
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
             ) {
-                items(groupParticipants) { participantUid ->
+                items(groupParticipants.toList()) { participantUid ->
+                    val participantName = remember { mutableStateOf("Member") }
+                    UserDatabase.getUserById(participantUid) {
+                        participantName.value = it.name
+                    }
                     Row {
-                        Text(text = participantUid)
+                        Text(text = participantName.value)
                         Button(onClick = { onRemoveParticipantClick(participantUid) }) {
-
+                            Text(text = "Remove")
                         }
                     }
                 }
