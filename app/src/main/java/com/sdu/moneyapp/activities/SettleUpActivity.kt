@@ -52,6 +52,7 @@ class SettleUpActivity : ComponentActivity() {
         finish()
     }
 
+    @Preview
     @Composable
     fun SettleUpScreen() {
         // Sample data, replace with actual data

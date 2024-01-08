@@ -60,6 +60,7 @@ class ChangeProfileActivity : ComponentActivity() {
         }
     }
 
+    @Preview
     @Composable
     fun ChangeProfileScreen() {
         var newName by remember { mutableStateOf("") }
