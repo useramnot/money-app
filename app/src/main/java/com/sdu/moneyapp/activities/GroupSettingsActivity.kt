@@ -1,125 +1,109 @@
 package com.sdu.moneyapp.activities
 
-import android.content.Intent
 import android.os.Bundle
-import android.widget.*
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
+import android.widget.Button
+import android.widget.EditText
+import android.widget.MultiAutoCompleteTextView
+import android.widget.Spinner
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import com.sdu.moneyapp.ParticipantsAdapter
-import com.sdu.moneyapp.R
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.sdu.moneyapp.MessagingService
+import com.sdu.moneyapp.databases.*
+import com.sdu.moneyapp.model.*
 
-class GroupSettingsActivity : AppCompatActivity() {
+class GroupSettingsActivity : ComponentActivity() {
 
-    private lateinit var buttonUpdateGroupInfo: Button
-    private lateinit var buttonAddParticipant: Button
-    private lateinit var listViewParticipants: ListView
-    private lateinit var buttonLeaveGroup: Button
-    private lateinit var buttonBack: Button
-
-    private lateinit var participantsAdapter: ParticipantsAdapter
-
-    private val database = FirebaseDatabase.getInstance()
-    private val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
     private val groupId: String by lazy { intent.getStringExtra("groupId") ?: "" }
+    private lateinit var group: Group
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_group_settings)
 
-        buttonUpdateGroupInfo = findViewById(R.id.buttonUpdateGroupInfo)
-        buttonAddParticipant = findViewById(R.id.buttonAddParticipant)
-        listViewParticipants = findViewById(R.id.listViewParticipants)
-        buttonLeaveGroup = findViewById(R.id.buttonLeaveGroup)
-        buttonBack = findViewById(R.id.buttonBack)
-
-        buttonBack.setOnClickListener {
-            finish()
+        GroupDatabase.getGroupById(groupId) {
+            group = it
         }
 
-        participantsAdapter = ParticipantsAdapter(this, R.layout.item_participant) { participantUid ->
-            removeParticipantFromGroup(participantUid)
-        }
-
-        listViewParticipants.adapter = participantsAdapter
-
-        loadParticipants()
-
-        buttonUpdateGroupInfo.setOnClickListener {
-            startActivity(Intent(this, EditGroupInfoActivity::class.java).putExtra("groupId", groupId))
-        }
-
-        buttonAddParticipant.setOnClickListener {
-            startActivity(Intent(this, AddParticipantsActivity::class.java).putExtra("groupId", groupId))
-        }
-
-        listViewParticipants.setOnItemClickListener { _, _, _, _ ->
-            // no action bc i would rather die
-        }
-
-        buttonLeaveGroup.setOnClickListener {
-            AlertDialog.Builder(this)
-                .setTitle("Leave Group")
-                .setMessage("Are you sure you want to leave the group?")
-                .setPositiveButton("Leave") { _, _ ->
-                    leaveGroup()
-                }
-                .setNegativeButton("Cancel", null)
-                .show()
-        }
+        setContent(
+            content = { GroupSettingsScreen() }
+        )
     }
 
-    private fun leaveGroup() {
-        val participantsReference = database.reference.child("groupParticipants").child(groupId)
+    private fun onBackClick() = finish()
 
-        participantsReference.child(currentUserUid).removeValue()
-            .addOnSuccessListener {
-                Toast.makeText(this, "Left the group successfully", Toast.LENGTH_SHORT).show()
-                finish()
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Failed to leave the group", Toast.LENGTH_SHORT).show()
-            }
+    private fun onSaveChangesClick(groupName: String, groupDescription: String) {
+        if (groupName != "") group.name = groupName
+        if (groupDescription != "") group.groupDescription = groupDescription
+        GroupDatabase.setGroup(group)
+        finish() // TODO: where to go?
     }
 
-    private fun loadParticipants() {
-        val participantsReference = database.reference.child("groupParticipants").child(groupId)
+    @Composable
+    fun GroupSettingsScreen() {
+        var groupName by remember { mutableStateOf(group.name) }
+        var groupDescription by remember { mutableStateOf(group.groupDescription) }
 
-        participantsReference.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                participantsAdapter.clear()
-
-                for (childSnapshot in snapshot.children) {
-                    val participantUid = childSnapshot.key ?: ""
-                    participantsAdapter.add(participantUid)
-                }
-
-                participantsAdapter.notifyDataSetChanged()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Top
+        ) {
+            // Back Button
+            Button(
+                onClick = { onBackClick() },
+                modifier = Modifier
+                    .wrapContentWidth(align = Alignment.Start)
+            ) {
+                Text(text = "Back")
             }
 
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@GroupSettingsActivity, "Error loading participants", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
+            // Group Name EditText
+            TextField(
+                value = groupName,
+                onValueChange = { groupName = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                label = { Text(text = "Group name") },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Text
+                )
+            )
 
-    private fun removeParticipantFromGroup(participantUid: String) {
-        AlertDialog.Builder(this)
-            .setTitle("Remove Participant")
-            .setMessage("Are you sure you want to remove this participant from the group?")
-            .setPositiveButton("Remove") { _, _ ->
-                val participantsReference = database.reference.child("groupParticipants").child(groupId)
+            // Group Description EditText
+            TextField(
+                value = groupDescription,
+                onValueChange = { groupDescription = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                label = { Text(text = "Group description") },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Text
+                )
+            )
 
-                participantsReference.child(participantUid).removeValue()
-                    .addOnSuccessListener {
-                        Toast.makeText(this, "Participant removed from the group", Toast.LENGTH_SHORT).show()
-                    }
-                    .addOnFailureListener {
-                        Toast.makeText(this, "Failed to remove participant from the group", Toast.LENGTH_SHORT).show()
-                    }
+            // Save Changes Button
+            Button(
+                onClick = { onSaveChangesClick(groupName, groupDescription) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            ) {
+                Text(text = "Save changes")
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+        }
     }
 }

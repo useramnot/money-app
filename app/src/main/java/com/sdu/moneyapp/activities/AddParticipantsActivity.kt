@@ -1,90 +1,105 @@
 package com.sdu.moneyapp.activities
 
-
+import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
+import android.util.Log
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.*
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+
 import com.sdu.moneyapp.R
+import com.sdu.moneyapp.databases.*
+import com.sdu.moneyapp.model.User
 
-class AddParticipantsActivity : AppCompatActivity() {
 
-    private lateinit var editTextParticipantEmail: EditText
-    private lateinit var buttonAddParticipant: Button
+class AddParticipantsActivity : ComponentActivity() {
 
-    private val database = FirebaseDatabase.getInstance()
-    private val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
     private val groupId: String by lazy { intent.getStringExtra("groupId") ?: "" }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_add_participant)
+        setContent(
+            content = { AddParticipantScreen() }
+        )
+    }
 
-        editTextParticipantEmail = findViewById(R.id.editTextParticipantEmail)
-        buttonAddParticipant = findViewById(R.id.buttonAddParticipant)
+    private fun onBackClick() = finish()
 
-        buttonAddParticipant.setOnClickListener {
-            addParticipantToGroup()
+    private fun onAddParticipantClick(participantEmail: String) {
+        try {
+            UserDatabase.getUserByEmail(participantEmail) {
+                if (it != null) GroupDatabase.addUserToGroup(it.uid, groupId)
+                else Toast.makeText(this, "No user with this email", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            // TODO: catch only specific error
+            Toast.makeText(this, "Error adding participant with this email", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun addParticipantToGroup() {
-        // Get the email input from editTextParticipantEmail
-        val participantEmail = editTextParticipantEmail.text.toString().trim()
 
-        // Check if the user with the provided email exists
-        // You may want to query the database to check for the existence of the user
-        // If the user exists, get their UID and add it to the group participants
-        val usersReference = database.reference.child("users")
-        usersReference.orderByChild("email").equalTo(participantEmail)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.exists()) {
-                        for (userSnapshot in snapshot.children) {
-                            val participantUid = userSnapshot.key ?: ""
-                            addUserToGroup(participantUid)
-                        }
-                    } else {
-                        // User with the provided email does not exist
-                        Toast.makeText(
-                            this@AddParticipantsActivity,
-                            "User not found with the provided email.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
+    @Composable
+    fun AddParticipantScreen() {
+        var participantEmail by remember { mutableStateOf("") }
 
-                override fun onCancelled(error: DatabaseError) {
-                    // Handle the error
-                    Toast.makeText(
-                        this@AddParticipantsActivity,
-                        "Error checking user existence",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            })
-    }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Top
+        ) {
+            // Back Button
+            Button(
+                onClick = { onBackClick() },
+                modifier = Modifier
+                    .wrapContentWidth(align = Alignment.Start)
+            ) {
+                Text(text = stringResource(id = R.string.back_button))
+            }
 
-    private fun addUserToGroup(participantUid: String) {
-        // Add participant UID to the list of participants in the group
-        val participantsReference = database.reference.child("groupParticipants").child(groupId)
-        participantsReference.child(participantUid).setValue(true)
+            // Participant Email EditText
+            TextField(
+                value = participantEmail,
+                onValueChange = { participantEmail = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                label = { Text(text = stringResource(id = R.string.enter_participant_s_email)) },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Email
+                )
+            )
 
-        // Display a success message
-        Toast.makeText(
-            this@AddParticipantsActivity,
-            "Participant added to the group.",
-            Toast.LENGTH_SHORT
-        ).show()
-
-        // Clear the input field after adding the participant
-        editTextParticipantEmail.text.clear()
+            // Add Participant Button
+            Button(
+                onClick = { onAddParticipantClick(participantEmail) },
+                modifier = Modifier
+                    .wrapContentWidth(align = Alignment.CenterHorizontally)
+                    .padding(top = 16.dp)
+            ) {
+                Text(text = stringResource(id = R.string.add_participant))
+            }
+        }
     }
 }
 

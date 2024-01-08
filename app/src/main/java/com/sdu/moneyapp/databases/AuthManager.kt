@@ -27,5 +27,6 @@ object AuthManager {
 
     // Function to get the current user UID
     fun getCurrentUserUid(): String = auth.currentUser?.uid ?: throw Exception("User not signed in.")
+    fun getCurrentUserEmail(): String = auth.currentUser?.email ?: throw Exception("User not signed in.")
     fun isUserSignedIn(): Boolean = auth.currentUser != null
 }

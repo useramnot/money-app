@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.sdu.moneyapp.MessagingService
 import com.sdu.moneyapp.databases.*
 import com.sdu.moneyapp.model.*
 
@@ -88,6 +89,7 @@ class AddExpenseActivity : ComponentActivity() {
         )
 
         // TODO: Notify participants
+        MessagingService.sendNotification()
 
         finish()
     }

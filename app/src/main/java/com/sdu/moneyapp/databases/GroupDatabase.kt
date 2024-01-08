@@ -12,9 +12,9 @@ object GroupDatabase : DatabaseManager() {
     private val savedGroups = mutableMapOf<String, Group>()
     private val savedGroupsAge = mutableMapOf<String, Long>()
     
-    fun createGroup(name : String, desc : String, participants : List<String>) {
+    fun createGroup(name : String, desc : String, participants : List<String>, callback: (String) -> Unit = {}) {
         val id = getGroupsCollection().document().id
-        setGroup(Group(id, name, desc, participants))
+        setGroup(Group(id, name, desc, participants)){ callback(id) }
     }
 
     fun addUserToGroup(userId : String, groupId : String) {
@@ -52,9 +52,10 @@ object GroupDatabase : DatabaseManager() {
         }.addOnFailureListener() {throw Exception("Group $groupId failed to be found: " + it.message)}
     }
 
-    fun setGroup(data : Group) {
+    fun setGroup(data : Group, callbackSuccess: () -> Unit = {}) {
         getGroupsCollection().document(data.uid).set(data).addOnSuccessListener {
             savedGroups[data.uid] = data
+            callbackSuccess()
         }.addOnFailureListener() {
             throw Exception("Group " + data.uid + " failed to set: " + it.message)
         }.addOnSuccessListener {

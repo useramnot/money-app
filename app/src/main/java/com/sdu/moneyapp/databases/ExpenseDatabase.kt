@@ -12,22 +12,30 @@ object ExpenseDatabase : DatabaseManager()
     fun createExpense(amount: Double, description: String, creator: String, groupId: String, participants: List<String>) {
         val id = getExpensesCollection().document().id
         setExpense(Expense(id, amount, description, creator, groupId, System.currentTimeMillis(), participants))
+        val owed = amount / (participants.size + 1)
+        GroupDatabase.getGroupById(groupId) { group ->
+            group.addExpense(id)
+            GroupDatabase.setGroup(group)
+            for (user in participants) {
+                BalanceDatabase.user1OwesUser2Amount(groupId, user, creator, owed)
+            }
+        }
     }
 
-    fun getExpenseById(expenseId : String) : Expense {
+    fun getExpenseById(expenseId : String, callback: (Expense) -> Unit ) {
         if (savedExpenses.containsKey(expenseId)) {
             if (System.currentTimeMillis() - savedExpensesAge.getValue(expenseId) > SUITABLE_AGE) {
                 savedExpenses.remove(expenseId)
                 savedExpensesAge.remove(expenseId)
-                return getExpenseById(expenseId)
+            }else {
+                callback(savedExpenses.getValue(expenseId))
             }
-            return savedExpenses.getValue(expenseId)
         }
         val expense = getExpensesCollection().document(expenseId).get().result.toObject(Expense::class.java)
             ?: throw Exception("Expense $expenseId failed to be found")
         savedExpenses[expenseId] = expense
         savedExpensesAge[expenseId] = System.currentTimeMillis()
-        return expense
+        callback(expense)
     }
 
     fun setExpense(data : Expense) {
@@ -37,12 +45,6 @@ object ExpenseDatabase : DatabaseManager()
             throw Exception("Expense " + data.uid + " failed to set")
         }
         savedExpenses[data.uid] = data
-    }
-
-    fun getExpensesByGroupId(groupId : String, callback: (List<Expense>) -> Unit) {
-        GroupDatabase.getGroupById(groupId){ group ->
-            callback(group.expenses.map { getExpenseById(it)})
-        }
     }
 
 }

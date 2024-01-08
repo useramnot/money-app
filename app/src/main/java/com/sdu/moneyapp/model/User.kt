@@ -4,16 +4,16 @@ import com.google.firebase.firestore.DocumentId
 import com.sdu.moneyapp.databases.UserDatabase
 
 data class User(
-    val uid: String,                                     // Unique identifier for the user
+    val uid: String,                                    // Unique identifier for the user
     var name: String,                                   // User's display name
-    var notificationSettings: Int,                // First position ('0' or '1'): new expense reminders,
+    var email: String,
+    var notificationSettings: Int,                      // First position ('0' or '1'): new expense reminders,
                                                         // Second position ('0' or '1'): expense reminder,
                                                         // Third position ('0' or '1'): group updates
-    //val groups: List<String> = emptyList()              // List of group IDs that the user is a member of
+    //val groups: List<String> = emptyList()            // List of group IDs that the user is a member of
 ){
-    constructor(id: String, name: String) : this(id, name, 111)
-    //no-argument constructor
-    constructor() : this("", "", 111)
+    constructor(id: String, name: String, email: String) : this(id, name, email, 111)
+    constructor() : this("", "", "", 111)
 
     //fun getUid(): String = uid
 

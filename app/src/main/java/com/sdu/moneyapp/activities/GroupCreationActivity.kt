@@ -26,10 +26,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.sdu.moneyapp.NotificationsManager
 
 import com.sdu.moneyapp.R
 import com.sdu.moneyapp.databases.*
+import com.sdu.moneyapp.model.Group
 
 class GroupCreationActivity : ComponentActivity() {
 
@@ -39,41 +39,17 @@ class GroupCreationActivity : ComponentActivity() {
         setContent(
             content = { CreateGroupScreen() }
         )
-//        setContentView(R.layout.activity_group_creation)
-//
-//        editTextGroupName = findViewById(R.id.editTextGroupName)
-//        editTextGroupDescription = findViewById(R.id.editTextGroupDescription)
-//        buttonCreateGroup = findViewById(R.id.buttonCreateGroup)
-//
-//
-//        buttonCreateGroup.setOnClickListener {
-//            val groupName = editTextGroupName.text.toString().trim()
-//            val groupDescription = editTextGroupDescription.text.toString().trim()
-//
-//            if (groupName.isEmpty()) {
-//                editTextGroupName.error = "Group Name is required."
-//                return@setOnClickListener
-//            }
-//            /*
-//            // Create a new group in the database
-//            val groupReference = database.reference.child("groups").push()
-//            val groupId = groupReference.key ?: ""
-//
-//            val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-//            val participants = listOf(currentUserUid)
-//
-//            val group = Group(groupId, groupName, groupDescription, participants)
-//            groupReference.setValue(group)
-//            */
-//
-//            GroupDatabase.createGroup(groupName, groupDescription, listOf(AuthManager.getCurrentUserUid()));
-//
-//            finish()
     }
 
     private fun onBackClick() = finish()
 
-    private fun onCreateGroupClick() {}
+    private fun onCreateGroupClick(name: String, decription: String) {
+        GroupDatabase.createGroup(name, decription, listOf(AuthManager.getCurrentUserUid())) {
+            val intent = Intent(this, AddParticipantsActivity::class.java)
+            intent.putExtra("groupId", it)
+            startActivity(intent)
+        }
+    }
 
     @Composable
     fun CreateGroupScreen() {
@@ -88,7 +64,7 @@ class GroupCreationActivity : ComponentActivity() {
         ) {
             // Back Button
             Button(
-                onClick = { /* TODO: Handle back button click */ },
+                onClick = { onBackClick() },
                 modifier = Modifier
                     .wrapContentWidth(align = Alignment.Start)
             ) {
@@ -123,7 +99,7 @@ class GroupCreationActivity : ComponentActivity() {
 
             // Create Group Button
             Button(
-                onClick = { /* TODO: Handle create group button click */ },
+                onClick = { onCreateGroupClick(groupName, groupDescription) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp)

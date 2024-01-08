@@ -21,49 +21,15 @@ class SettleUpDetailsActivity : AppCompatActivity() {
     private lateinit var buttonSave: Button
     private lateinit var buttonBack: Button
 
-    private val database = FirebaseDatabase.getInstance()
-    private val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
     private val groupId: String by lazy { intent.getStringExtra("groupId") ?: "" }
+    private val otherUser : String by lazy { intent.getStringExtra("participant") ?: "" }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settle_up_details)
 
-        spinnerPayer = findViewById(R.id.spinnerPayer)
-        spinnerPayee = findViewById(R.id.spinnerPayee)
-        editTextAmount = findViewById(R.id.editTextAmount)
-        buttonSave = findViewById(R.id.buttonSave)
-        buttonBack = findViewById(R.id.buttonBack)
-
-        // Set up spinners with group participants
-        loadGroupParticipants()
-
-        buttonSave.setOnClickListener {
-            saveSettleUpDetails()
-        }
-
-        buttonBack.setOnClickListener {
-            finish()
-        }
     }
 
-    private fun loadGroupParticipants() {
-        val participantsReference = database.reference.child("groupParticipants").child(groupId)
-
-        participantsReference.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val groupParticipants = snapshot.children.mapNotNull { it.key }
-
-                // Update spinners with group participants
-                updateSpinnerAdapter(spinnerPayer, groupParticipants)
-                updateSpinnerAdapter(spinnerPayee, groupParticipants)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                // Handle error
-            }
-        })
-    }
+    private fun onSettleClick()
 
     private fun updateSpinnerAdapter(spinner: Spinner, data: List<String>) {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, data)

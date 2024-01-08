@@ -1,33 +1,33 @@
 package com.sdu.moneyapp.activities
 
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
+import androidx.compose.foundation.layout.Row
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.sdu.moneyapp.R
+import com.sdu.moneyapp.databases.AuthManager
 
 class NotificationSettingsActivity : ComponentActivity() {
-
-    private lateinit var buttonBack: Button
-    private lateinit var switchNewExpenseNotification: SwitchCompat
-    private lateinit var switchExpenseReminders: SwitchCompat
-    private lateinit var switchGroupUpdates: SwitchCompat
-
-    private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
-    private val databaseReference: DatabaseReference by lazy { FirebaseDatabase.getInstance().reference }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notification_settings)
 
-        buttonBack = findViewById(R.id.buttonBack)
-        switchNewExpenseNotification = findViewById(R.id.switchNewExpenseNotification)
-        switchExpenseReminders = findViewById(R.id.switchExpenseReminders)
-        switchGroupUpdates = findViewById(R.id.switchGroupUpdates)
+        /*
 
         buttonBack.setOnClickListener {
             finish()
@@ -45,9 +45,9 @@ class NotificationSettingsActivity : ComponentActivity() {
 
         switchGroupUpdates.setOnCheckedChangeListener { _, isChecked ->
             saveNotificationSetting("groupUpdates", isChecked)
-        }
+        }*/
     }
-
+/*
     private fun loadNotificationSettings() {
         val currentUserUid = auth.currentUser?.uid
 
@@ -77,13 +77,62 @@ class NotificationSettingsActivity : ComponentActivity() {
     }
 
     private fun saveNotificationSetting(settingKey: String, isEnabled: Boolean) {
-        val currentUserUid = auth.currentUser?.uid
+        val currentUserUid = AuthManager.getCurrentUserUid()
+        val settingsReference = databaseReference.child("notificationSettings").child(currentUserUid)
+        settingsReference.child(settingKey).setValue(isEnabled)
+    }*/
 
-        if (currentUserUid != null) {
-            val settingsReference = databaseReference.child("notificationSettings").child(currentUserUid)
-            settingsReference.child(settingKey).setValue(isEnabled)
+    @Preview
+    @Composable
+    fun SettingsScreen() {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Button(
+                onClick = { finish() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            ) {
+                Text(text = stringResource(id = R.string.back_button))
+            }
+
+            SettingItem(
+                label = stringResource(id = R.string.new_expense_notification),
+                checked = remember { mutableStateOf(false) }
+            )
+
+            SettingItem(
+                label = stringResource(id = R.string.expense_reminders),
+                checked = remember { mutableStateOf(false) }
+            )
+
+            SettingItem(
+                label = stringResource(id = R.string.group_updates),
+                checked = remember { mutableStateOf(false) }
+            )
         }
     }
 
+
+    @Composable
+    fun SettingItem(label: String, checked: MutableState<Boolean>) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = label)
+
+            Switch(
+                checked = checked.value,
+                onCheckedChange = { checked.value = it },
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+    }
 
 }

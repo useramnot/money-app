@@ -17,4 +17,8 @@ open class DatabaseManager {
     fun getExpensesCollection() : CollectionReference {
         return database.collection("expenses")
     }
+
+    fun getBalancesCollection() : CollectionReference {
+        return database.collection("balances")
+    }
 }

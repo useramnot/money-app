@@ -1,88 +1,122 @@
 package com.sdu.moneyapp.activities
 
-// Inside com.sdu.moneyapp package
-
 import android.content.Intent
 import android.os.Bundle
-import android.widget.ListView
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
-import com.sdu.moneyapp.R
-import com.sdu.moneyapp.SettleUpAdapter
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.*
+import com.sdu.moneyapp.databases.*
+import com.sdu.moneyapp.model.*
 
-class SettleUpActivity : AppCompatActivity() {
 
-    private lateinit var listViewParticipants: ListView
-    private lateinit var settleUpAdapter: SettleUpAdapter
-
-    private val database = FirebaseDatabase.getInstance()
-    private val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+class SettleUpActivity : ComponentActivity() {
+    private val currentUserUid = AuthManager.getCurrentUserUid()
     private val groupId: String by lazy { intent.getStringExtra("groupId") ?: "" }
+    private lateinit var group: Group
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settle_up)
 
-        listViewParticipants = findViewById(R.id.listViewSettleUpParticipants)
-
-        settleUpAdapter = SettleUpAdapter(this, R.layout.item_settle_up_participant) { participantUid, isOwed ->
-            // TODO: Implement logic for settling up or reminding based on isOwed
-            // TODO: Send notification for reminding
-            // This could involve showing a confirmation dialog
-            // and updating the database, and refreshing the UI
-            settleUpOrRemind(participantUid, isOwed)
+        GroupDatabase.getGroupById(groupId) {
+            group = it
         }
 
-        listViewParticipants.adapter = settleUpAdapter
-
-        loadSettleUpParticipants()
+        setContent(
+            content = { GroupOverviewScreen() }
+        )
     }
 
-    private fun loadSettleUpParticipants() {
-        val participantsReference = database.reference.child("groupParticipants").child(groupId)
+    private fun onSettleUpClick(participant: String) {
+        val intent = Intent(this, SettleUpDetailsActivity::class.java)
+        intent.putExtra("groupId", groupId)
+        intent.putExtra("participant", participant)
+        startActivity(intent)
+    }
 
-        participantsReference.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val unsettledParticipants = mutableListOf<String>()
+    @Preview
+    @Composable
+    fun GroupOverviewScreen() {
+        // Sample data, replace with actual data
+        val groupName by remember { mutableStateOf(group.name) }
+        val groupDescription by remember { mutableStateOf(group.groupDescription) }
+        val participantList by remember { mutableStateOf(group.participants)}
 
-                for (participantSnapshot in snapshot.children) {
-                    val participantUid = participantSnapshot.key
-                    // TODO: Implement logic to check if the participant is owed or settled up
-                    // For now, let's assume all participants are unsettled
-                    if (participantUid != null) {
-                        unsettledParticipants.add(participantUid)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Top
+        ) {
+            // Back Button
+            Button(
+                onClick = { /* Handle back button click */ },
+                modifier = Modifier
+                    .wrapContentWidth(align = Alignment.Start)
+            ) { Text(text = "Back") }
+
+            // Group Settings Button
+            Button(
+                onClick = { /* Handle group settings button click */ },
+                modifier = Modifier
+                    .wrapContentWidth(align = Alignment.Start)
+                    .padding(top = 8.dp)
+            ) { Text(text = "Group Settins") }
+
+            // Group Details
+            Text(
+                text = groupName,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+
+            Text(
+                text = groupDescription,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+            // List of Debts
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            ) {
+                items(participantList) { participant ->
+                    if (participant == AuthManager.getCurrentUserUid()) return@items
+                    var amount by remember { mutableDoubleStateOf(0.0) }
+                    var name by remember { mutableStateOf("Another user") }
+                    UserDatabase.getUserById(participant) {
+                        name = it.name
+                    }
+                    BalanceDatabase.getOwingOnGroupWithUser(groupId, currentUserUid, participant){
+                        amount = it
+                    }
+                    Row {
+                        Text(
+                            text = if (amount > 0) "You owe $name $amount" else "$name owes you $amount",
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Button(
+                            onClick = {
+                                onSettleUpClick(participant)
+                            },
+                            modifier = Modifier
+                                .wrapContentWidth(align = Alignment.CenterHorizontally)
+                                .padding(top = 16.dp)
+                        ) {  Text(text = "Settle Up") }
                     }
                 }
-
-                // Update the adapter with the list of unsettled participants
-                settleUpAdapter.clear()
-                settleUpAdapter.addAll(unsettledParticipants)
-                settleUpAdapter.notifyDataSetChanged()
             }
-
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@SettleUpActivity, "Error loading settle up participants", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
-
-    private fun settleUpOrRemind(participantUid: String, isOwed: Boolean) {
-        // If isOwed is false, navigate to a new activity
-        if (!isOwed) {
-            // TODO: Implement your navigation logic here
-            // For example, you can create a new Intent to start a SettleUpDetailsActivity
-            val intent = Intent(this, SettleUpDetailsActivity::class.java)
-            intent.putExtra("participantUid", participantUid)
-            startActivity(intent)
-        } else {
-            // TODO: Implement logic for reminding based on isOwed
-            // This could involve showing a confirmation dialog
-            // and updating the database, and refreshing the UI
-            // For now, let's just print a message
         }
     }
-
 }

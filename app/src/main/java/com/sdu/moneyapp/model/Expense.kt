@@ -12,10 +12,6 @@ data class Expense(
 ){
     //no-argument constructor
     constructor() : this("", 0.0, "", "", "", 0, emptyList(), emptyMap())
-
-    fun getOwed() : Double {
-        return amount / (participants.size + 1)
-    }
 }
 
 
