@@ -62,7 +62,7 @@ class SettleUpDetailsActivity : ComponentActivity() {
                 Text(text = stringResource(id = R.string.back_button))
             }
             var amountSettled by remember { mutableDoubleStateOf(0.0) }
-            var amount by remember { mutableStateOf(0.0) }
+            var amount by remember { mutableDoubleStateOf(0.0) }
             var name by remember { mutableStateOf("Another user") }
             UserDatabase.getUserById(otherUser) {
                 name = it.name

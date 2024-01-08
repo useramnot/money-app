@@ -1,15 +1,10 @@
 package com.sdu.moneyapp.activities
 
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.MultiAutoCompleteTextView
-import android.widget.Spinner
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.*
 import androidx.compose.material3.*
@@ -42,12 +37,14 @@ class AddExpenseActivity : ComponentActivity() {
     private fun loadParticipantsForGroup(groupId: String, list: MutableList<User>) {
         list.clear()
         GroupDatabase.getGroupById(groupId) { group ->
-            val users = group.participants
-            for (it in users) {
+            Log.d("MYAPP", "List: $list")
+            Log.d("MYAPP", "Group: $group")
+            for (it in group.participants) {
                 UserDatabase.getUserById(it) { user ->
                     list.add(user)
                 }
             }
+            Log.d("MYAPP", "List: $list")
         }
     }
 
@@ -91,9 +88,7 @@ class AddExpenseActivity : ComponentActivity() {
             Button(
                 onClick = { finish() },
                 modifier = Modifier.padding(vertical = 8.dp)
-            ) {
-                Text(text = "Back")
-            }
+            ) { Text(text = "Back") }
             var amount by remember { mutableStateOf("") }
             TextField(
                 value = amount,
@@ -119,7 +114,6 @@ class AddExpenseActivity : ComponentActivity() {
             val participants = remember { mutableStateListOf<String>() }
             var expandedParticipant by remember { mutableStateOf(false) }
 
-            var selectedGroup by remember { mutableStateOf(false) }
             var groupOb by remember {
                 mutableStateOf(
                     Group(
@@ -130,19 +124,21 @@ class AddExpenseActivity : ComponentActivity() {
                     )
                 )
             }
-            var expanded by remember { mutableStateOf(false) }
+            var selectedGroup by remember { mutableStateOf(false) }
+            var expandedGroups by remember { mutableStateOf(false) }
             val groupOptions = remember { mutableStateListOf<Group>() }
 
             // Group Loader
             loadGroups(groupOptions)
 
+            // Group Dropdown
             Box {
-                TextButton(onClick = { expanded = true; expandedParticipant = false }) {
+                TextButton(onClick = { expandedGroups = true; expandedParticipant = false }) {
                     Text(text = if (!selectedGroup) "Choose Group" else groupOb.name)
                 }
                 DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
+                    expanded = expandedGroups,
+                    onDismissRequest = { expandedGroups = false },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     groupOptions.forEach { groupObDrop ->
@@ -150,9 +146,16 @@ class AddExpenseActivity : ComponentActivity() {
                             text = { Text(text = groupObDrop.name) },
                             onClick = {
                                 groupOb = groupObDrop
-                                expanded = false
+                                expandedGroups = false
                                 selectedGroup = true
-                                loadParticipantsForGroup(groupOb.uid, participantOptions) // Load participants
+                                participantOptions.clear()
+                                //loadParticipantsForGroup(groupOb.uid, participantOptions) // Load participants
+                                for (it in groupOb.participants) {
+                                    UserDatabase.getUserById(it) { user ->
+                                        participantOptions.add(user)
+                                    }
+                                }
+                                Log.d("MYAPP", "List: $participantOptions")
                                 participants.clear()
                                 expandedParticipant = true
                             }
@@ -161,6 +164,7 @@ class AddExpenseActivity : ComponentActivity() {
                 }
             }
 
+            // Participant Dropdown
             DropdownMenu(
                 expanded = expandedParticipant,
                 onDismissRequest = { expandedParticipant = false },
@@ -183,26 +187,22 @@ class AddExpenseActivity : ComponentActivity() {
                             }
                         },
                         onClick = {
-                            if (participants.contains(participant.uid)) {
-                                participants.remove(participant.uid)
-                            } else {
-                                participants.add(participant.uid)
-                            }
-                        })
+                            if (participants.contains(participant.uid)) participants.remove(participant.uid)
+                            else participants.add(participant.uid)
+                        }
+                    )
                 }
 
+                // Add Expense Button
                 Button(
                     onClick = { onAddExpenseClick(groupOb, amount, description, participants) },
                     modifier = Modifier
                         .padding(top = 16.dp)
                         .fillMaxWidth(),
                     enabled = selectedGroup
-                ) {
-                    Text(text = "Save Expense")
-                }
+                ) { Text(text = "Save Expense") }
             }
         }
-
     }
 }
 

@@ -74,6 +74,10 @@ class HomeActivity : ComponentActivity() {
     fun HomeScreen() {
 
         val groups = remember { mutableStateListOf<Group>() }
+        var oweText by remember { mutableStateOf("Calculating your debts..." ) }
+        BalanceDatabase.getOverAllOwing(AuthManager.getCurrentUserUid()) {
+            oweText = if (it == 0.0) "You are settled" else if (it > 0.0) "You owe $it" else "You are owed ${-it}"
+        }
         loadGroups(groups)
 
         Column(
@@ -109,7 +113,7 @@ class HomeActivity : ComponentActivity() {
 
             // Overall Owing Text
             Text(
-                text = stringResource(id = R.string.overall_owing_placeholder),
+                text = oweText ,
                 modifier = Modifier.padding(vertical = 8.dp),
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.bodyLarge,
