@@ -11,26 +11,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.widget.Button
-import android.widget.ListView
-import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.tooling.preview.Preview
-import com.google.firebase.auth.FirebaseAuth
-import com.sdu.moneyapp.ExpenseAdapter
-import com.sdu.moneyapp.FirebaseDatabaseManager
 import com.sdu.moneyapp.R
 import com.sdu.moneyapp.databases.*
-import com.sdu.moneyapp.model.Expense
-import com.sdu.moneyapp.model.Group
 
 class GroupOverviewActivity : ComponentActivity() {
 

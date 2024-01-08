@@ -27,10 +27,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         FirebaseApp.initializeApp(this)
-        firebaseMessaging = FirebaseMessaging.getInstance()
-        firebaseMessaging.isAutoInitEnabled = true
+        //firebaseMessaging = FirebaseMessaging.getInstance()
+        //firebaseMessaging.isAutoInitEnabled = true
 
-        MessagingService.subscribeNotifications()
+        //MessagingService.subscribeNotifications()
 
         // Check if user is logged in, and redirect to HomeActivity if so, if not, LoginActivity
         if (!AuthManager.isUserSignedIn())
