@@ -18,7 +18,7 @@ object BalanceDatabase : DatabaseManager() {
                                .whereEqualTo("groupId", groupId)
                                .get().addOnSuccessListener {
             if (it.size() == 0) {
-                callback(createBalance(Balance("", 0.0, u1, u2)))
+                callback(createBalance(Balance("", groupId, 0.0, u1, u2)))
             } else {
                 callback(it.elementAt(0).toObject(Balance::class.java))
             }
