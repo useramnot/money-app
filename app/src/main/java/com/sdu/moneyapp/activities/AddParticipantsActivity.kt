@@ -87,6 +87,7 @@ class AddParticipantsActivity : ComponentActivity() {
         }
     }
 
+    @Preview
     @Composable
     fun AddParticipantScreen() {
         var participantEmail by remember { mutableStateOf("") }
@@ -100,7 +101,8 @@ class AddParticipantsActivity : ComponentActivity() {
             verticalArrangement = Arrangement.Top
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Button(
                     onClick = { onBackClick() },
@@ -136,6 +138,7 @@ class AddParticipantsActivity : ComponentActivity() {
                 modifier = Modifier
                     .wrapContentWidth(align = Alignment.CenterHorizontally)
                     .padding(top = 16.dp)
+                    .align(Alignment.End)
             ) { Text(text = stringResource(id = R.string.add_participant)) }
 
             // List of participants

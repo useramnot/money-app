@@ -50,6 +50,7 @@ class GroupCreationActivity : ComponentActivity() {
         startActivity(intent)
     }
 
+    @Preview
     @Composable
     fun CreateGroupScreen() {
         var groupName by remember { mutableStateOf("") }

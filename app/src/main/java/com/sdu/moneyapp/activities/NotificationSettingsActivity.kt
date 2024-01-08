@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -93,26 +94,31 @@ class NotificationSettingsActivity : ComponentActivity() {
             Button(
                 onClick = { finish() },
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .wrapContentWidth()
                     .padding(top = 16.dp)
             ) {
                 Text(text = stringResource(id = R.string.back_button))
             }
-
             SettingItem(
                 label = stringResource(id = R.string.new_expense_notification),
                 checked = remember { mutableStateOf(false) }
             )
+
+            Divider(modifier = Modifier.fillMaxWidth(), color = Color.Gray, thickness = 1.dp)
 
             SettingItem(
                 label = stringResource(id = R.string.expense_reminders),
                 checked = remember { mutableStateOf(false) }
             )
 
+            Divider(modifier = Modifier.fillMaxWidth(), color = Color.Gray, thickness = 1.dp)
+
             SettingItem(
                 label = stringResource(id = R.string.group_updates),
                 checked = remember { mutableStateOf(false) }
             )
+
+            Divider(modifier = Modifier.fillMaxWidth(), color = Color.Gray, thickness = 1.dp)
         }
     }
 
@@ -123,14 +129,16 @@ class NotificationSettingsActivity : ComponentActivity() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(text = label)
 
             Switch(
                 checked = checked.value,
                 onCheckedChange = { checked.value = it },
-                modifier = Modifier.padding(start = 8.dp)
+                modifier = Modifier
+                    .padding(start = 8.dp)
             )
         }
     }

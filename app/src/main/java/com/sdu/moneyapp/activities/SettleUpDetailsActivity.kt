@@ -46,6 +46,7 @@ class SettleUpDetailsActivity : ComponentActivity() {
         }
     }
 
+    @Preview
     @Composable
     fun MyComposeLayout() {
         Column(
