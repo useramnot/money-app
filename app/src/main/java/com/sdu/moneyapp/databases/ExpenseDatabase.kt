@@ -1,5 +1,6 @@
 package com.sdu.moneyapp.databases
 
+import android.util.Log
 import com.sdu.moneyapp.model.Expense
 import com.sdu.moneyapp.model.User
 import java.util.Date
@@ -12,6 +13,9 @@ object ExpenseDatabase : DatabaseManager()
     fun createExpense(amount: Double, description: String, creator: String, groupId: String, participants: List<String>) {
         val id = getExpensesCollection().document().id
         val otherParticipants = participants.minus(creator)
+        for (it in otherParticipants) {
+            Log.d("MYAPP", "otherPArticipant: $it")
+        }
         setExpense(Expense(id, amount, description, creator, groupId, System.currentTimeMillis(), otherParticipants))
         val owed = amount / (otherParticipants.size + 1)
         GroupDatabase.getGroupById(groupId) { group ->

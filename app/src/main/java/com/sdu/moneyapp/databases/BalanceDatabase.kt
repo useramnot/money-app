@@ -1,6 +1,7 @@
 package com.sdu.moneyapp.databases
 
 import com.sdu.moneyapp.model.Balance
+import com.sdu.moneyapp.model.Group
 
 object BalanceDatabase : DatabaseManager() {
 

@@ -6,6 +6,7 @@ import android.os.Build
 import android.content.pm.PackageManager
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,9 +18,10 @@ import com.sdu.moneyapp.activities.HomeActivity
 import com.sdu.moneyapp.activities.LoginActivity
 import com.sdu.moneyapp.databases.AuthManager
 import com.sdu.moneyapp.MessagingService
+import com.sdu.moneyapp.ui.theme.MoneyAppTheme
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
 
     private lateinit var firebaseMessaging: FirebaseMessaging
 

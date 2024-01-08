@@ -103,7 +103,7 @@ class SettleUpActivity : ComponentActivity() {
                             currentUserUid,
                             participant
                         ) {
-                            amount = it
+                            amount = if (currentUserUid < participant) it else -it
                         }
                         if (amount != 0.0) {
                             Row {

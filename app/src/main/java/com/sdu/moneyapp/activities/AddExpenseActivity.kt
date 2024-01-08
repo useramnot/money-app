@@ -17,14 +17,26 @@ import androidx.compose.ui.unit.dp
 import com.sdu.moneyapp.MessagingService
 import com.sdu.moneyapp.databases.*
 import com.sdu.moneyapp.model.*
+import com.sdu.moneyapp.ui.theme.MoneyAppTheme
 
 class AddExpenseActivity : ComponentActivity() {
+    private val expenseAmount by lazy { intent.getStringExtra("amount") ?: "" }
+    private val expenseDescription by lazy { intent.getStringExtra("description") ?: "" }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent(
             content = { ExpenseScreen() }
+            // content = { MoneyAppTheme { ExpenseScreen() } }
         )
+    }
+
+    private fun resetActivity(expenseAmount: String, expenseDescription: String) {
+        val intent = intent
+        intent.putExtra("amount", expenseAmount)
+        intent.putExtra("description", expenseDescription)
+        finish()
+        startActivity(intent)
     }
 
     private fun loadGroups(list: MutableList<Group>) {
@@ -34,25 +46,11 @@ class AddExpenseActivity : ComponentActivity() {
         }
     }
 
-    private fun loadParticipantsForGroup(groupId: String, list: MutableList<User>) {
-        list.clear()
-        GroupDatabase.getGroupById(groupId) { group ->
-            Log.d("MYAPP", "List: $list")
-            Log.d("MYAPP", "Group: $group")
-            for (it in group.participants) {
-                UserDatabase.getUserById(it) { user ->
-                    list.add(user)
-                }
-            }
-            Log.d("MYAPP", "List: $list")
-        }
-    }
-
     private fun onAddExpenseClick(
         group: Group,
         amount: String,
         description: String,
-        participants: List<String>
+        participants: MutableList<String>
     ) {
         if (amount.isBlank()) {
             Toast.makeText(
@@ -62,7 +60,7 @@ class AddExpenseActivity : ComponentActivity() {
             ).show()
             return
         }
-        if (participants.isEmpty()) participants.plus(group.participants)
+        if (participants.isEmpty()) participants.addAll(group.participants)
         ExpenseDatabase.createExpense(
             amount.toDouble(),
             description,
@@ -89,7 +87,7 @@ class AddExpenseActivity : ComponentActivity() {
                 onClick = { finish() },
                 modifier = Modifier.padding(vertical = 8.dp)
             ) { Text(text = "Back") }
-            var amount by remember { mutableStateOf("") }
+            var amount by remember { mutableStateOf(expenseAmount) }
             TextField(
                 value = amount,
                 onValueChange = { amount = it },
@@ -100,7 +98,7 @@ class AddExpenseActivity : ComponentActivity() {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
-            var description by remember { mutableStateOf("") }
+            var description by remember { mutableStateOf(expenseDescription) }
             TextField(
                 value = description,
                 onValueChange = { description = it },
@@ -149,14 +147,15 @@ class AddExpenseActivity : ComponentActivity() {
                                 expandedGroups = false
                                 selectedGroup = true
                                 participantOptions.clear()
+                                Log.d("MYAPP", "Wiped")
                                 //loadParticipantsForGroup(groupOb.uid, participantOptions) // Load participants
-                                for (it in groupOb.participants) {
-                                    UserDatabase.getUserById(it) { user ->
-                                        participantOptions.add(user)
-                                    }
-                                }
-                                for (it in participantOptions) {
-                                    Log.d("MYAPP", "List: $it")
+                                Log.d("MYAPP", "Size: ${groupOb.participants.size}")
+                                groupOb.participants.forEach {
+                                    if (it != AuthManager.getCurrentUserUid())
+                                        UserDatabase.getUserById(it) { user ->
+                                            participantOptions.add(user)
+                                            Log.d("MYAPP", "Added: $user")
+                                        }
                                 }
                                 participants.clear()
                                 expandedParticipant = true
@@ -169,7 +168,12 @@ class AddExpenseActivity : ComponentActivity() {
             // Participant Dropdown
             DropdownMenu(
                 expanded = expandedParticipant,
-                onDismissRequest = { expandedParticipant = false },
+                onDismissRequest = {
+                    expandedParticipant = false
+                    participantOptions.clear()
+                    Log.d("MYAPP", "Wiped")
+                    //resetActivity(amount, description)
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 participantOptions.forEach { participant ->

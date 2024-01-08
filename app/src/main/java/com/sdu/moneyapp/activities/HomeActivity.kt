@@ -25,6 +25,7 @@ import com.sdu.moneyapp.R
 import com.sdu.moneyapp.databases.*
 import com.sdu.moneyapp.model.Group
 import kotlinx.coroutines.launch
+import com.sdu.moneyapp.ui.theme.MoneyAppTheme
 
 class HomeActivity : ComponentActivity() {
 
@@ -33,6 +34,7 @@ class HomeActivity : ComponentActivity() {
 
         setContent(
             content = { HomeScreen() }
+            // content = { MoneyAppTheme { HomeScreen() } }
         )
     }
 
@@ -113,7 +115,7 @@ class HomeActivity : ComponentActivity() {
 
             // Overall Owing Text
             Text(
-                text = oweText,
+                text = oweText ,
                 modifier = Modifier.padding(vertical = 8.dp),
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.bodyLarge,
