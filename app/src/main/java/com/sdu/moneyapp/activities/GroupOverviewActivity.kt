@@ -15,10 +15,14 @@ import android.view.View
 import android.widget.Button
 import android.widget.ListView
 import android.widget.TextView
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.firebase.auth.FirebaseAuth
 import com.sdu.moneyapp.ExpenseAdapter
@@ -28,68 +32,21 @@ import com.sdu.moneyapp.databases.*
 import com.sdu.moneyapp.model.Expense
 import com.sdu.moneyapp.model.Group
 
-class GroupOverviewActivity : AppCompatActivity() {
-
-    private lateinit var textViewGroupName: TextView
-    private lateinit var textViewGroupDescription: TextView
-    private lateinit var textViewMySummary: TextView
-    private lateinit var buttonSettleUp: Button
-    private lateinit var listViewExpenses: ListView
-
-    private val databaseManager: FirebaseDatabaseManager by lazy { FirebaseDatabaseManager }
-
-    private lateinit var currentUserUid: String
+class GroupOverviewActivity : ComponentActivity() {
 
     private val groupId: String by lazy { intent.getStringExtra("groupId") ?: "" }
-    private lateinit var group: Group
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        GroupDatabase.getGroupById(groupId) {
-            group = it
-        }
 
         setContent(
             content = { GroupDetailsScreen() }
         )
     }
 
-
-    private fun fetchAndDisplayExpenses(groupId: String) {
-        FirebaseDatabaseManager.getExpensesForUserInGroup(currentUserUid, groupId) { expenses ->
-            val expenseAdapter = ExpenseAdapter(this, expenses)
-            listViewExpenses.adapter = expenseAdapter
-
-            val groupSummary = calculateGroupSummary(expenses)
-            textViewMySummary.text = groupSummary
-        }
-    }
-
-    private fun calculateGroupSummary(expenses: List<Expense>): String {
-        val totalOwed = expenses
-            .filter { currentUserUid in it.owedAmounts }
-            .sumOf { it.owedAmounts[currentUserUid] ?: 0.0 }
-
-        val totalOwing = expenses
-            .filter { it.payerUid == currentUserUid }
-            .sumOf { it.amount } - expenses
-            .filter { currentUserUid in it.participants && it.payerUid == currentUserUid }
-            .sumOf { it.amount }
-
-        val balance = totalOwed - totalOwing
-
-        return when {
-            balance > 0 -> "You Are Owed: $$balance"
-            balance < 0 -> "You Owe: $${-balance}"
-            else -> "You Are Settled Up"
-        }
-    }
-
-    private fun onSettleUpClick() {
+    private fun onSettleUpClick(groupId: String) {
         val intent = Intent(this, SettleUpActivity::class.java)
-        intent.putExtra("groupId", intent.getStringExtra("groupId"))
+        intent.putExtra("groupId", groupId)
         startActivity(intent)
     }
 
@@ -102,14 +59,17 @@ class GroupOverviewActivity : AppCompatActivity() {
     @Preview
     @Composable
     fun GroupDetailsScreen() {
-        var groupName by remember { mutableStateOf(group.name) }
-        var groupDescription by remember { mutableStateOf(group.groupDescription) }
+        var groupName by remember { mutableStateOf("Group Name") }
+        var groupDescription by remember { mutableStateOf("Group Description") }
         val groupExpense = remember { mutableStateListOf<String>()}
 
         GroupDatabase.getGroupById(groupId) { group ->
             groupName = group.name
             groupDescription = group.groupDescription
-            groupExpense.addAll(group.expenses)
+            groupExpense.clear()
+            for (expense in group.expenses) {
+                groupExpense.add(expense)
+            }
         }
 
         Column(
@@ -148,7 +108,7 @@ class GroupOverviewActivity : AppCompatActivity() {
 
             // Settle Up Button
             Button(
-                onClick = { onSettleUpClick() },
+                onClick = { onSettleUpClick(groupId) },
                 modifier = Modifier.padding(top = 16.dp)
             ) {
                 Text(text = stringResource(id = R.string.settle_up_button))
@@ -156,39 +116,46 @@ class GroupOverviewActivity : AppCompatActivity() {
 
             // List of Expenses
             LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
             ) {
                 items(groupExpense) { expenseId ->
                     var amount by remember { mutableDoubleStateOf(0.0) }
                     var description by remember { mutableStateOf("Expense Description") }
+                    var payer by remember { mutableStateOf("Payer") }
                     var involved by remember { mutableStateOf(false)}
 
                     ExpenseDatabase.getExpenseById(expenseId) { it ->
                         amount = it.amount
                         description = it.description
+                        if (it.payerUid == AuthManager.getCurrentUserUid()) {
+                            payer = "You"
+                        }
+                        else {
+                            UserDatabase.getUserById(it.payerUid) { user ->
+                                payer = user.name
+                            }
+                        }
+                        UserDatabase.getUserById(it.payerUid) { user ->
+                            payer = user.name
+                        }
                         if ((it.participants.contains(AuthManager.getCurrentUserUid()) || it.payerUid == AuthManager.getCurrentUserUid())) {
                             involved = true
                         }
                     }
                     if (involved){
-                        Column (
-                            //set visibility to gone if the user is not involved in the expense
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp)
-
-                        )
-                        {
+                                .background(Color.White)
+                        ) {
                             Text(
-                                text = amount.toString(),
-                                modifier = Modifier.padding(vertical = 8.dp),
-                                color = MaterialTheme.colorScheme.onSurface,
+                                text = "$payer spent $amount on $description",
+                                modifier = Modifier.padding(horizontal = 8.dp),
                                 style = MaterialTheme.typography.bodyLarge
-                            )
-                            Text(
-                                text = description,
-                                modifier = Modifier.padding(vertical = 8.dp),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                style = MaterialTheme.typography.bodySmall
                             )
                         }
                     }

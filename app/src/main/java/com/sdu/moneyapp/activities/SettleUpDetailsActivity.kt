@@ -1,26 +1,34 @@
 package com.sdu.moneyapp.activities
 
+import android.content.Intent
 import android.os.Bundle
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Spinner
-import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.*
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+
 import com.sdu.moneyapp.R
+import com.sdu.moneyapp.databases.*
+import com.sdu.moneyapp.model.User
 
-class SettleUpDetailsActivity : AppCompatActivity() {
-
-    private lateinit var spinnerPayer: Spinner
-    private lateinit var spinnerPayee: Spinner
-    private lateinit var editTextAmount: EditText
-    private lateinit var buttonSave: Button
-    private lateinit var buttonBack: Button
-
+class SettleUpDetailsActivity : ComponentActivity() {
+    private val currentUser : String = AuthManager.getCurrentUserUid()
     private val groupId: String by lazy { intent.getStringExtra("groupId") ?: "" }
     private val otherUser : String by lazy { intent.getStringExtra("participant") ?: "" }
 
@@ -29,27 +37,60 @@ class SettleUpDetailsActivity : AppCompatActivity() {
 
     }
 
-    private fun onSettleClick()
+    private fun onBackClick() = finish()
 
-    private fun updateSpinnerAdapter(spinner: Spinner, data: List<String>) {
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, data)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner.adapter = adapter
+    private fun onSettleClick(amount: Double) {
+        BalanceDatabase.settleAmountWithUser(groupId, currentUser, otherUser, amount) {
+            Toast.makeText(this, "Settled up", Toast.LENGTH_SHORT).show()
+            finish()
+        }
     }
 
+    @Composable
+    fun MyComposeLayout() {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Button(
+                onClick = {onBackClick()},
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(top = 16.dp)
+            ) {
+                Text(text = stringResource(id = R.string.back_button))
+            }
+            var amountSettled by remember { mutableDoubleStateOf(0.0) }
+            var amount by remember { mutableStateOf(0.0) }
+            var name by remember { mutableStateOf("Another user") }
+            UserDatabase.getUserById(otherUser) {
+                name = it.name
+            }
+            BalanceDatabase.getOwingOnGroupWithUser(groupId, currentUser, otherUser) {
+                amount = it
+            }
 
-    private fun saveSettleUpDetails() {
-        // TODO: Implement logic to save settle-up details
-        // You may want to get the selected payer, payee, and amount
-        // and update the database accordingly
-        val payer = spinnerPayer.selectedItem.toString()
-        val payee = spinnerPayee.selectedItem.toString()
-        val amount = editTextAmount.text.toString().toDoubleOrNull() ?: 0.0
-
-        // Update the database with settle-up details
-        // ...
-
-        // Close the activity
-        finish()
+            Text(text = "You owe $name $amount")
+            TextField(
+                value = amount.toString(),
+                onValueChange = { amountSettled = it.toDouble() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp),
+                label = { Text(text = stringResource(id = R.string.enter_amount)) },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Number
+                )
+            )
+            Button(
+                onClick = { onSettleClick(amountSettled) },
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .align(Alignment.End)
+            ) {
+                Text(text = "Settle up")
+            }
+        }
     }
 }

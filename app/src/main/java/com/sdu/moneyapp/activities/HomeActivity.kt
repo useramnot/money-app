@@ -1,38 +1,35 @@
 package com.sdu.moneyapp.activities
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.Modifier
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.*
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.sdu.moneyapp.R
 import com.sdu.moneyapp.databases.*
-import com.sdu.moneyapp.model.*
+import com.sdu.moneyapp.model.Group
+import kotlinx.coroutines.launch
 
 class HomeActivity : ComponentActivity() {
-    private lateinit var groups:  List<Group>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        loadGroups()
 
         setContent(
             content = { HomeScreen() }
@@ -41,43 +38,43 @@ class HomeActivity : ComponentActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        loadGroups()
+        val intent = intent
+        finish()
+        startActivity(intent)
     }
 
     private fun onLogoClick() {
-        startActivity(Intent(this, SettingsActivity::class.java))
+        startActivityForResult(Intent(this, SettingsActivity::class.java), 0)
     }
 
     private fun onAddExpenseClick() {
-        startActivity(Intent(this, AddExpenseActivity::class.java))
+        startActivityForResult(Intent(this, AddExpenseActivity::class.java), 1)
     }
 
     private fun onCreateGroupClick(){
-        startActivityForResult(Intent(this, GroupCreationActivity::class.java), 0)
+        startActivityForResult(Intent(this, GroupCreationActivity::class.java), 2)
     }
 
     private fun onGroupClick(group : Group){
         val intent = Intent(this, GroupOverviewActivity::class.java)
         intent.putExtra("groupId", group.uid)
-        startActivityForResult(intent, 1)
+        startActivity(intent)
     }
 
-    private fun loadGroups() {
-        val list = ArrayList<Group>()
+    private fun loadGroups(list: MutableList<Group>) {
+        list.clear()
         GroupDatabase.getGroupsByUser(AuthManager.getCurrentUserUid()) {
             list.add(it)
             Log.d("MYAPP", "Group " + it.name + " added to options")
         }
-        groups = list
     }
 
     @Preview
     @Composable
-    fun HomeScreen(groupViewModel: GroupsViewModel = GroupsViewModel()) {
+    fun HomeScreen() {
 
-        val groups by remember { groupViewModel.groups }
-        // val groupsList by remember { mutableStateOf(groups) }
-        // loadGroups(groups)
+        val groups = remember { mutableStateListOf<Group>() }
+        loadGroups(groups)
 
         Column(
             modifier = Modifier
@@ -125,7 +122,9 @@ class HomeActivity : ComponentActivity() {
             Button(
                 onClick = { onCreateGroupClick() },
                 modifier = Modifier.padding(vertical = 8.dp)
-            ) { Text(text = "Create") }
+            ) {
+                Text(text = stringResource(id = R.string.create_group))
+            }
 
             // List of Groups
             LazyColumn(
@@ -134,7 +133,7 @@ class HomeActivity : ComponentActivity() {
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
             ) {
-                items(groupsList) { group ->
+                items(groups) { group ->
                     Log.d("MYAPP", "Displaying: $group")
                     Button (
                         onClick = { onGroupClick(group) },
@@ -170,20 +169,5 @@ class HomeActivity : ComponentActivity() {
                 Text(text = stringResource(id = R.string.add_expense))
             }
         }
-    }
-}
-
-// A View model for updating groups in the UI
-class GroupsViewModel : ViewModel() {
-    private val _groups = MutableLiveData<List<Group>>()
-    val groups: LiveData<List<Group>> = _groups
-
-    fun loadGroups() {
-        val list = ArrayList<Group>()
-        GroupDatabase.getGroupsByUser(AuthManager.getCurrentUserUid()) {
-            list.add(it)
-            Log.d("MYAPP", "Group " + it.name + " added to options")
-        }
-        _groups.value = list
     }
 }

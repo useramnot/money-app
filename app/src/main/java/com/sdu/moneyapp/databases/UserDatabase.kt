@@ -67,13 +67,12 @@ public object UserDatabase : DatabaseManager() {
         getUsersCollection().document(data.uid).set(data)
             .addOnSuccessListener {
                 savedUsers[data.uid] = data
+                savedUsersAge[data.uid] = System.currentTimeMillis()
                 callbackSuccess()
             }
             .addOnFailureListener {
                 callbackError(it.message ?: "Unknown error")
                 throw Exception("User " + data.uid + " failed to set: " + it.message)
             }
-        savedUsers[data.uid] = data
-        savedUsersAge[data.uid] = System.currentTimeMillis()
     }
 }

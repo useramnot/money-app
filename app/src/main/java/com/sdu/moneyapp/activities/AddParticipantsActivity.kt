@@ -34,7 +34,10 @@ import com.sdu.moneyapp.model.User
 
 class AddParticipantsActivity : ComponentActivity() {
 
-    private val groupId: String by lazy { intent.getStringExtra("groupId") ?: "" }
+    private val groupId by lazy { intent.getStringExtra("groupId") }
+    private val groupName by lazy { intent.getStringExtra("groupName") }
+    private val groupDescription by lazy { intent.getStringExtra("groupDescription") ?: " "}
+    private val groupParticipants = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +51,7 @@ class AddParticipantsActivity : ComponentActivity() {
     private fun onAddParticipantClick(participantEmail: String) {
         try {
             UserDatabase.getUserByEmail(participantEmail) {
-                if (it != null) GroupDatabase.addUserToGroup(it.uid, groupId)
+                if (it != null) groupParticipants.add(it.uid)
                 else Toast.makeText(this, "No user with this email", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
@@ -57,6 +60,15 @@ class AddParticipantsActivity : ComponentActivity() {
         }
     }
 
+    private fun onDoneClick() {
+        if (groupId == null) GroupDatabase.createGroup(groupName!!, groupDescription, groupParticipants) { }
+        else if (groupId != null) {
+            GroupDatabase.getGroupById(groupId!!) { group ->
+                group.participants.addAll(groupParticipants)
+                GroupDatabase.setGroup(group)
+            }
+        }
+    }
 
     @Composable
     fun AddParticipantScreen() {
@@ -68,13 +80,19 @@ class AddParticipantsActivity : ComponentActivity() {
                 .padding(16.dp),
             verticalArrangement = Arrangement.Top
         ) {
-            // Back Button
-            Button(
-                onClick = { onBackClick() },
-                modifier = Modifier
-                    .wrapContentWidth(align = Alignment.Start)
+            Row(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = stringResource(id = R.string.back_button))
+                Button(
+                    onClick = { onBackClick() },
+                    modifier = Modifier
+                        .wrapContentWidth(align = Alignment.Start)
+                ) { Text(text = stringResource(id = R.string.back_button)) }
+                Button(
+                    onClick = { onDoneClick() },
+                    modifier = Modifier
+                        .wrapContentWidth(align = Alignment.End)
+                ) { Text(text = "Done") }
             }
 
             // Participant Email EditText
@@ -96,9 +114,7 @@ class AddParticipantsActivity : ComponentActivity() {
                 modifier = Modifier
                     .wrapContentWidth(align = Alignment.CenterHorizontally)
                     .padding(top = 16.dp)
-            ) {
-                Text(text = stringResource(id = R.string.add_participant))
-            }
+            ) { Text(text = stringResource(id = R.string.add_participant)) }
         }
     }
 }

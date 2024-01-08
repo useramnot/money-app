@@ -55,12 +55,10 @@ object GroupDatabase : DatabaseManager() {
     fun setGroup(data : Group, callbackSuccess: () -> Unit = {}) {
         getGroupsCollection().document(data.uid).set(data).addOnSuccessListener {
             savedGroups[data.uid] = data
+            savedGroupsAge[data.uid] = System.currentTimeMillis()
             callbackSuccess()
         }.addOnFailureListener() {
             throw Exception("Group " + data.uid + " failed to set: " + it.message)
-        }.addOnSuccessListener {
-            savedGroups[data.uid] = data
-            savedGroupsAge[data.uid] = System.currentTimeMillis()
         }
     }
 

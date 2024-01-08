@@ -6,24 +6,24 @@ data class Group(
     val uid: String, // Unique identifier for the group
     var name: String,
     var groupDescription: String,
-    var participants: List<String>, // List of UIDs of users in the group
-    var expenses: List<String> // List of expenses associated with the group
+    var participants: MutableList<String>, // List of UIDs of users in the group
+    var expenses: MutableList<String> // List of expenses associated with the group
 ) {
     constructor(id: String, name: String, desc: String, participants: List<String>) :
-            this(id, name, desc, participants, emptyList())
+            this(id, name, desc, participants.toMutableList(), mutableListOf())
     constructor(id: String, name: String, desc: String) :
-            this(id, name, desc, listOf(AuthManager.getCurrentUserUid()), emptyList())
+            this(id, name, desc, mutableListOf(AuthManager.getCurrentUserUid()), mutableListOf())
     //no-argument constructor
-    constructor() : this("", "", "", emptyList(), emptyList())
+    constructor() : this("", "", "", mutableListOf(), mutableListOf())
     fun addParticipant(uid: String) {
         if (!participants.contains(uid)) {
-            participants.plus(uid)
+            participants.add(uid)
         }
     }
 
     fun addExpense(expenseId: String) {
         if (!expenses.contains(expenseId)) {
-            expenses.plus(expenseId)
+            expenses.add(expenseId)
         }
     }
 }

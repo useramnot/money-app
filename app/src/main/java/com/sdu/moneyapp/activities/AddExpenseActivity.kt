@@ -25,20 +25,6 @@ import com.sdu.moneyapp.model.*
 
 class AddExpenseActivity : ComponentActivity() {
 
-    private lateinit var editTextAmount: EditText
-    private lateinit var editTextDescription: EditText
-    private lateinit var spinnerPayer: Spinner
-    private lateinit var multiAutoCompleteTextViewParticipants: MultiAutoCompleteTextView
-    private lateinit var buttonSaveExpense: Button
-
-    private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
-    private val databaseReference: DatabaseReference by lazy { FirebaseDatabase.getInstance().reference }
-
-    private val groupId: String by lazy { intent.getStringExtra("groupId") ?: "" }
-    private val currentUserUid: String by lazy { auth.currentUser?.uid ?: "" }
-
-    private lateinit var groupParticipants: List<String>
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent(
@@ -57,7 +43,7 @@ class AddExpenseActivity : ComponentActivity() {
         list.clear()
         GroupDatabase.getGroupById(groupId) { group ->
             val users = group.participants
-            users.forEach {
+            for (it in users) {
                 UserDatabase.getUserById(it) { user ->
                     list.add(user)
                 }
@@ -166,7 +152,6 @@ class AddExpenseActivity : ComponentActivity() {
                                 groupOb = groupObDrop
                                 expanded = false
                                 selectedGroup = true
-                                participantOptions.clear() // Clear existing participants
                                 loadParticipantsForGroup(groupOb.uid, participantOptions) // Load participants
                                 participants.clear()
                                 expandedParticipant = true

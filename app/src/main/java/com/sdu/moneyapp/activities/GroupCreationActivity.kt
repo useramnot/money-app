@@ -44,11 +44,10 @@ class GroupCreationActivity : ComponentActivity() {
     private fun onBackClick() = finish()
 
     private fun onCreateGroupClick(name: String, decription: String) {
-        GroupDatabase.createGroup(name, decription, listOf(AuthManager.getCurrentUserUid())) {
-            val intent = Intent(this, AddParticipantsActivity::class.java)
-            intent.putExtra("groupId", it)
-            startActivity(intent)
-        }
+        val intent = Intent(this, AddParticipantsActivity::class.java)
+        intent.putExtra("groupName", name)
+        intent.putExtra("groupDescription", decription)
+        startActivity(intent)
     }
 
     @Composable

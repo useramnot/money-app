@@ -31,20 +31,21 @@ object ExpenseDatabase : DatabaseManager()
                 callback(savedExpenses.getValue(expenseId))
             }
         }
-        val expense = getExpensesCollection().document(expenseId).get().result.toObject(Expense::class.java)
-            ?: throw Exception("Expense $expenseId failed to be found")
-        savedExpenses[expenseId] = expense
-        savedExpensesAge[expenseId] = System.currentTimeMillis()
-        callback(expense)
+        getExpensesCollection().document(expenseId).get().addOnSuccessListener {
+            val expense = it.toObject(Expense::class.java) ?: throw Exception("Expense $expenseId failed to be found")
+            savedExpenses[expenseId] = expense
+            savedExpensesAge[expenseId] = System.currentTimeMillis()
+            callback(expense)
+        }
     }
 
     fun setExpense(data : Expense) {
         getExpensesCollection().document(data.uid).set(data).addOnSuccessListener {
             savedExpenses[data.uid] = data
+            savedExpensesAge[data.uid] = System.currentTimeMillis()
         }.addOnFailureListener {
             throw Exception("Expense " + data.uid + " failed to set")
         }
-        savedExpenses[data.uid] = data
     }
 
 }
