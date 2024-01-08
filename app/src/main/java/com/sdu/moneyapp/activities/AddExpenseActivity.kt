@@ -155,7 +155,9 @@ class AddExpenseActivity : ComponentActivity() {
                                         participantOptions.add(user)
                                     }
                                 }
-                                Log.d("MYAPP", "List: $participantOptions")
+                                for (it in participantOptions) {
+                                    Log.d("MYAPP", "List: $it")
+                                }
                                 participants.clear()
                                 expandedParticipant = true
                             }

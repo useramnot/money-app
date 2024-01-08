@@ -78,13 +78,13 @@ class SettingsActivity : ComponentActivity() {
             }
 
             // Notification Settings Option
-            Button(
+            /*Button(
                 onClick = { onNotificationSettingsClick() },
                 modifier = Modifier.padding(top = 16.dp)
                     .fillMaxWidth()
             ) {
                 Text(text = stringResource(id = R.string.notification_settings))
-            }
+            }*/
 
             // Sign Out Button
             Button(

@@ -1,32 +1,33 @@
 package com.sdu.moneyapp.activities
 
+import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import android.os.Bundle
-import android.widget.Button
-import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.appcompat.widget.SwitchCompat
-import androidx.compose.foundation.layout.Row
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import androidx.compose.ui.unit.dp
+import com.sdu.moneyapp.MessagingService
 import com.sdu.moneyapp.R
-import com.sdu.moneyapp.databases.AuthManager
+import com.sdu.moneyapp.databases.*
+import com.sdu.moneyapp.model.*
 
 class NotificationSettingsActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_notification_settings)
+        setContent(
+            content = {SettingsScreen()}
+        )
 
         /*
 
